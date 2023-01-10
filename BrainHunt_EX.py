@@ -51,9 +51,9 @@ if __name__ == "__main__":
     cbtc:bool = False
     ceth:bool = False
     calt:bool = False
-    bfbtc:BF
-    bfeth:BF
-    bfalt:BF
+    bfbtc = BF
+    bfeth = BF
+    bfalt = BF
     data_local:any
     desc:str = 'local'
     id:int = 0
@@ -88,8 +88,6 @@ if __name__ == "__main__":
 
     if telegram_enable:
         telegram_enable = send_telegram(f'[I] Version BrainHunt EX: {local_version_brain_ex} ID:{id} desc:{desc} Start programm: {date_str()}', telegram_channel_id, telegram_token)
-        if telegram_enable == False:
-            balance_enable = False
 
     print('-'*70,end='\n')
     print(f'[I] Version BrainHunt: {cyan}v{local_version_brain_ex} EX')
@@ -104,14 +102,12 @@ if __name__ == "__main__":
     else: print(f'[I] minimalistic OUT console: {red}Disabled')
     if raw: print(f'[I] Input Raw private key: {green}Enable')
     else: print(f'[I] Input Raw private key: {red}Disabled')
-    if balance_enable: print(f'[I] Check balance BTC: {green}Enable')
-    else: print(f'[I] Check balance: {red}Disabled')
     if telegram_enable: print(f'[I] Send telegram: {green}Enable')
     else: print(f'[I] Send telegram: {red}Disabled')
     print('-'*70,end='\n')
-    if cbtc: bfbtc = load_BF(bfbtc_dir)
-    if ceth: bfeth = load_BF(bfeth_dir)
-    if calt: bfalt = load_BF(bfalt_dir)
+    if cbtc: bfbtc.bit, bfbtc.hash, bfbtc.bf = load_BF(bfbtc_dir)
+    if ceth: bfeth.bit, bfeth.hash, bfeth.bf = load_BF(bfeth_dir)
+    if calt: bfalt.bit, bfalt.hash, bfalt.bf = load_BF(bfalt_dir)
     print(f'[I] {green}Bloomfilter loaded...')
     print('-'*70,end='\n')
     line_co = 0
@@ -148,14 +144,14 @@ if __name__ == "__main__":
                 for iii in range(len(results[ii])):
                     if results[ii][iii][0] == 'btc':
                         if cbtc:
-                            if results[ii][iii][3].hex() in bfbtc:
+                            if check_in_bloom(results[ii][iii][3].hex(), bfbtc.bit, bfbtc.hash, bfbtc.bf):
                                 print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
                                     send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
                             co += 4
                         if calt:
-                            if results[ii][iii][3].hex() in bfalt:
+                            if check_in_bloom(results[ii][iii][3].hex(), bfalt.bit, bfalt.hash, bfalt.bf):
                                 print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
@@ -163,7 +159,7 @@ if __name__ == "__main__":
                             co += 4
                     if results[ii][iii][0] == 'eth':
                         if ceth:
-                            if results[ii][iii][3] in bfeth:
+                            if check_in_bloom(results[ii][iii][3], bfeth.bit, bfeth.hash, bfeth.bf):
                                 print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:

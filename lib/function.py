@@ -214,7 +214,7 @@ def gen_hash(text):
             except:
                 text_sha = hex(random.randrange(2**240,2**256))[2:]
             byt = bytes.fromhex(text_sha.zfill(64))
-            sha = get_sha256(byt)
+            sha = get_sha256(byt).hex()
             gen.append([sha,sha,cb,ca,ce])
             text_sha = sha
         return gen
