@@ -131,13 +131,13 @@ if __name__ == "__main__":
     bf14.bit, bf14.hash, bf14.bf = load_BF(dbdir+'BTCFull14.bf')
     bf15.bit, bf15.hash, bf15.bf = load_BF(dbdir+'BTCFull15.bf')
     bf16.bit, bf16.hash, bf16.bf = load_BF(dbdir+'BTCFull16.bf')
-    bf17.bit, bf17.hash, bf17.bf = load_BF(dbdir+'BTCFull17.bf')
-    catt = True # Включить если ALT
+    #bf17.bit, bf17.hash, bf17.bf = load_BF(dbdir+'BTCFull17.bf')
+    ceth = True # Включить если ETH
     bfeth0.bit, bfeth0.hash, bfeth0.bf = load_BF(dbdir+'ETHFull00.bf')
     bfeth1.bit, bfeth1.hash, bfeth1.bf = load_BF(dbdir+'ETHFull01.bf')
     bfeth2.bit, bfeth2.hash, bfeth2.bf = load_BF(dbdir+'ETHFull02.bf')
     bfeth3.bit, bfeth3.hash, bfeth3.bf = load_BF(dbdir+'ETHFull03.bf')
-    ceth = True # Включить если ETH
+    catt = True # Включить если ALT    
     bfalt0.bit, bfalt0.hash, bfalt0.bf = load_BF(dbdir+'ALTFull00.bf')
     print(f'{green}Bloomfilter loaded...')
     print('-'*70,end='\n')
@@ -182,7 +182,7 @@ if __name__ == "__main__":
                                     check_in_bloom(results[ii][iii][3].hex(), bf6.bit, bf6.hash, bf6.bf) or check_in_bloom(results[ii][iii][3].hex(), bf7.bit, bf7.hash, bf7.bf) or check_in_bloom(results[ii][iii][3].hex(), bf8.bit, bf8.hash, bf8.bf) or \
                                     check_in_bloom(results[ii][iii][3].hex(), bf9.bit, bf9.hash, bf9.bf) or check_in_bloom(results[ii][iii][3].hex(), bf10.bit, bf10.hash, bf10.bf) or check_in_bloom(results[ii][iii][3].hex(), bf11.bit, bf11.hash, bf11.bf) or \
                                     check_in_bloom(results[ii][iii][3].hex(), bf12.bit, bf12.hash, bf12.bf) or check_in_bloom(results[ii][iii][3].hex(), bf13.bit, bf13.hash, bf13.bf) or check_in_bloom(results[ii][iii][3].hex(), bf14.bit, bf14.hash, bf14.bf) or \
-                                    check_in_bloom(results[ii][iii][3].hex(), bf15.bit, bf15.hash, bf15.bf) or check_in_bloom(results[ii][iii][3].hex(), bf16.bit, bf16.hash, bf16.bf) or check_in_bloom(results[ii][iii][3].hex(), bf17.bit, bf17.hash, bf17.bf):
+                                    check_in_bloom(results[ii][iii][3].hex(), bf15.bit, bf15.hash, bf15.bf) or check_in_bloom(results[ii][iii][3].hex(), bf16.bit, bf16.hash, bf16.bf):# or check_in_bloom(results[ii][iii][3].hex(), bf17.bit, bf17.hash, bf17.bf):
                                     print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND;word:{results[ii][iii][1]};PVK:{(results[ii][iii][2])};Algo:{results[ii][iii][4]};ID:{id};desc:{desc};{in_file}')
                                     if telegram_enable:
