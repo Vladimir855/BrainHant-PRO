@@ -1,0 +1,8 @@
+codecs
+requests
+bitcoin
+bitcoinlib
+colorama
+pycryptodome
+mmh3
+bitarray

@@ -1,0 +1,6 @@
+hashcat - World's fastest and most advanced password recovery utility
+hashcat-utils - Small utilities that are useful in advanced password cracking
+maskprocessor - High-performance word generator with a per-position configureable charset
+statsprocessor - Word generator based on per-position markov-chains
+princeprocessor - Standalone password candidate generator using the PRINCE algorithm
+kwprocessor - Advanced keyboard-walk generator with configureable basechars, keymap and routes
