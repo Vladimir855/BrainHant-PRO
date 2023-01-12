@@ -18,6 +18,7 @@ from sys import stdin
 from os import path, environ, mkdir
 from datetime import datetime
 from Crypto.Hash import keccak
+import glob, pathlib
 from io import TextIOWrapper
 from json import loads, dump
 from .secp256k1_lib import privatekey_to_ETH_address, pubkey_to_h160, scalar_multiplication, pubkey_to_ETH_address, get_sha256, read_bloom_file, check_in_bloom
@@ -26,21 +27,25 @@ import string, secrets, random
 from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
-yellow = Fore.YELLOW+Style.BRIGHT
-red = Fore.RED+Style.BRIGHT
-clear = Style.RESET_ALL
-green = Fore.GREEN+Style.BRIGHT
-blink = Fore.RED+Style.DIM
-cyan = Fore.CYAN+Style.BRIGHT
-back = '\033[1A'
-clear_screen = '\x1b[2J'
-
 alphabet = string.ascii_letters + string.digits
 
+class color:
+    yellow = Fore.YELLOW+Style.BRIGHT
+    red = Fore.RED+Style.BRIGHT
+    clear = Style.RESET_ALL
+    green = Fore.GREEN+Style.BRIGHT
+    blink = Fore.RED+Style.DIM
+    cyan = Fore.CYAN+Style.BRIGHT
+    back = '\033[1A'
+    clear_screen = '\x1b[2J'
+
 class BF():
-    bit = any
-    hash = any
-    bf = any
+    def __init__(self, file_bf) -> None:
+        if path.exists(file_bf):
+            self.bit, self.hash, self.bf = read_bloom_file(file_bf)
+        else:
+            print(f'[E] File bloomfilter: {file_bf} not found.')
+            exit(1)
 
 def gen_word():
     word = ''.join(secrets.choice(alphabet) for i in range(random.randrange(2,32)))
@@ -62,7 +67,7 @@ def send_telegram(text: str, telegram_channel_id, telegram_token):
         chat_id=telegram_channel_id,
         text=text))
     except:
-        print(f'[E] {red}Error send telegram. Reconnect.')
+        print(f'[E] {color.red}Error send telegram. Reconnect.')
         return False
     else: 
         return True
@@ -91,24 +96,12 @@ def load_configure(file):
             else:
                 return data
     else: 
-        print(f'[W] {red}The settings file is missing. Download from server.')
+        print(f'[W] {color.red}The settings file is missing. Download from server.')
         exit(1)
 
 def date_str():
     now = datetime.now()
     return now.strftime("%Y/%m/%d/, %H:%M:%S")
-
-def load_BF(load):
-    _bit=''
-    _hash=''
-    _bf=''
-    try:
-        _bit, _hash, _bf = read_bloom_file(load)
-    except FileNotFoundError:
-        print(f'[E] File bloomfilter: {load} not found.')
-        exit(1)
-    else:
-        return _bit, _hash, _bf
 
 def bw(input_list):
     text = input_list[0]
@@ -121,28 +114,27 @@ def bw(input_list):
         pub_raw = scalar_multiplication(pvk_i)
         f1 = []
         if cb or ca:
-            f1.append(['btc',text,pvk_i,pubkey_to_h160(0, False, pub_raw),'RAW'])
-            f1.append(['btc',text,pvk_i,pubkey_to_h160(0, True, pub_raw),'RAW'])
-            f1.append(['btc',text,pvk_i,pubkey_to_h160(1, True, pub_raw),'RAW'])
-            f1.append(['btc',text,pvk_i,pubkey_to_h160(2, True, pub_raw),'RAW'])
+            f1.append(['btc', text, pvk_i, pubkey_to_h160(0, False, pub_raw),'RAW'])
+            f1.append(['btc', text ,pvk_i, pubkey_to_h160(0, True, pub_raw),'RAW'])
+            f1.append(['btc', text, pvk_i, pubkey_to_h160(1, True, pub_raw),'RAW'])
         if ce:
-            f1.append(['eth',text,pvk_i,pubkey_to_ETH_address(pub_raw)[2:],'RAW'])
+            f1.append(['eth', text, pvk_i, pubkey_to_ETH_address(pub_raw)[2:],'RAW'])
         return f1
     else:
         f1 = []
-        binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-        hash_sha256 = get_sha256(binary_data).hex()
-        pub_sha256 = scalar_multiplication(int(hash_sha256,16))
-        f1.append(['btc',text,hash_sha256,pubkey_to_h160(0, False, pub_sha256),'SHA256'])
-        f1.append(['btc',text,hash_sha256,pubkey_to_h160(0, True, pub_sha256),'SHA256'])
-        f1.append(['btc',text,hash_sha256,pubkey_to_h160(1, True, pub_sha256),'SHA256'])
-        f1.append(['btc',text,hash_sha256,pubkey_to_h160(2, True, pub_sha256),'SHA256'])
-
-        k = keccak.new(digest_bits=256)
-        k.update(binary_data)
-        hash_keccak_256 = k.hexdigest()
-        pub_keccak_256 = scalar_multiplication(int(hash_keccak_256,16))
-        f1.append(['eth',text,hash_keccak_256,pubkey_to_ETH_address(pub_keccak_256)[2:],'keccak256'])
+        if cb or ca:
+            binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
+            hash_sha256 = get_sha256(binary_data).hex()
+            pub_sha256 = scalar_multiplication(int(hash_sha256,16))
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, pub_sha256),'SHA256'])
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, True, pub_sha256),'SHA256'])
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, pub_sha256),'SHA256'])
+        if ce:
+            k = keccak.new(digest_bits=256)
+            k.update(binary_data)
+            hash_keccak_256 = k.hexdigest()
+            pub_keccak_256 = scalar_multiplication(int(hash_keccak_256,16))
+            f1.append(['eth',text,hash_keccak_256,pubkey_to_ETH_address(pub_keccak_256)[2:],'keccak256'])
         return f1
 
 def bw_seq(text):
