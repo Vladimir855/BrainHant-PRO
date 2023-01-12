@@ -6,17 +6,8 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-
+version = 'BrainHunt SEQ 3.05/12.01.23'
 from lib.function import *
-
-yellow = Fore.YELLOW+Style.BRIGHT
-red = Fore.RED+Style.BRIGHT
-clear = Style.RESET_ALL
-green = Fore.GREEN+Style.BRIGHT
-blink = Fore.RED+Style.DIM
-cyan = Fore.CYAN+Style.BRIGHT
-back = '\033[1A'
-clear_screen = '\x1b[2J'
 
 def init_worker():
     signal(SIGINT, SIG_IGN)
@@ -24,9 +15,7 @@ def init_worker():
 def createParser():
     parser = ArgumentParser(description='BrainHunt-SEQ')
     parser.add_argument ('-th', '--threading', action='store', type=int, help='threading', default='1')
-    parser.add_argument ('-dbbtc', '--database1', action='store', type=str, help='File BF', default='')
-    parser.add_argument ('-dbeth', '--database2', action='store', type=str, help='File BF ETH', default='')
-    parser.add_argument ('-dbalt', '--database3', action='store', type=str, help='File BF ALT', default='')
+    parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='File BF', default='')
     parser.add_argument ('-telegram', '--telegram', action='store_true', help='enable update')
     parser.add_argument ('-id', '--id', action='store', type=int, help='threading', default='0')
     parser.add_argument ('-desc', '--desc', action='store', type=str, help='description', default='local')
@@ -38,50 +27,43 @@ def createParser():
     parser.add_argument ('-raw2', '--raw2', action='store_true', help='RAW2 Hasher')
     parser.add_argument ('-dbg', '--dbg', action='store_true', help='Debug')
     parser.add_argument ('-div', '--div', action='store', type=int, help='divider', default=-1)
-    return parser.parse_args().threading, parser.parse_args().database1, parser.parse_args().database2, parser.parse_args().database3, \
+    return parser.parse_args().threading, parser.parse_args().database_dir, \
         parser.parse_args().telegram, parser.parse_args().id, parser.parse_args().desc, parser.parse_args().save, \
         parser.parse_args().minout, parser.parse_args().wordstop, parser.parse_args().word, parser.parse_args().raw1, parser.parse_args().raw2, parser.parse_args().dbg, parser.parse_args().div
 
 if __name__ == "__main__":
     freeze_support()
-    print(clear_screen)
-    local_version_brain_seq:float = 0.0
+    print(color.clear_screen)
     telegram_token:str = ''
     telegram_channel_id:str = ''
     telegram_enable:bool = False
     continue_point_seq:str = ''
     th:int = 1
-    balance_enable:bool = False
-    bfbtc_dir:str = ''
-    bfeth_dir:str = ''
-    bfalt_dir:str = ''
+    bf_dir:str = ''
+    list_btc:list = []
+    list_eth:list = []
+    list_alt:list = []
     cbtc:bool = False
     ceth:bool = False
     calt:bool = False
-    bfbtc = BF
-    bfeth = BF
-    bfalt = BF
     data_local:any
     desc:str = 'local'
     id:int = 0
     save = -1
-    coin_blockchain:list = []
-    coin_ice_num:list = []
     minout = False
     words_iter:int = 0
     word = ''
     rnd_word = False
     
-    th, bfbtc_dir, bfeth_dir, bfalt_dir, telegram_enable, id, desc, save, minout, words_iter, word, raw1, raw2, dbg, div  = createParser()
+    th, bf_dir, telegram_enable, id, desc, save, minout, words_iter, word, raw1, raw2, dbg, div  = createParser()
 
     data_local = load_configure('setings.json')
     try:
-        local_version_brain_seq:float = data_local['general']['version_brain_seq']
         telegram_token = data_local['telegram']['token']
         telegram_channel_id = data_local['telegram']['id']
         continue_point_seq = data_local['general'][f'continue_point_seq{id}@']
     except:
-        print(f'[E] {red}Please Update file configuration!')
+        print(f'[E] {color.red}Please Update file configuration!')
         exit(1)
 
     if raw1 == raw2: raw2=False
@@ -98,62 +80,65 @@ if __name__ == "__main__":
         rnd_word = True
 
     print('-'*70,end='\n')
-    print(f'{green}Thank you very much: @iceland2k14 for his libraries!')
-
-    if bfbtc_dir != '':
-        cbtc = True
-    if bfeth_dir != '':
-        ceth = True
-    if bfalt_dir != '':
-        calt = True
+    print(f'{color.green}Thank you very much: @iceland2k14 for his libraries!')
 
     if th < 1:
         print('[E] The number of processes must be greater than 0')
         th = 1
 
     if telegram_enable:
-        telegram_enable = send_telegram(f'[I] Version BrainHunt SEQ: {local_version_brain_seq} ID:{id} desc:{desc} Start programm: {date_str()}', telegram_channel_id, telegram_token)
-        if telegram_enable == False:
-            balance_enable = False
+        telegram_enable = send_telegram(f'[I] Version: {version} ID:{id} desc:{desc} Start programm: {date_str()}', telegram_channel_id, telegram_token)
 
     print('-'*70,end='\n')
-    print(f'[I] Version BrainHunt: {cyan}v{local_version_brain_seq} SEQ')
-    print(f'[I] Start proogramm: {cyan}{date_str()}')
-    print(f'[I] Total kernel of CPU: {cyan}{cpu_count()}')
-    print(f'[I] Used kernel: {cyan}{th}')
-    print(f'[I] Description: {cyan}{desc}')
-    print(f'[I] Used ID: {cyan}{id}')
-    print(f'[I] iterate word: {cyan}{words_iter}')
-    print(f'[I] Save continuation time: {cyan}{save}/sec')
-    print(f'[I] Input DATA: {cyan}{word}')
-    print(f'[I] Database Bloom Filter BTC: {cyan}{bfbtc_dir}')
-    if ceth: print(f'[I] Database Bloom Filter ETH: {cyan}{bfeth_dir}')
-    if calt: print(f'[I] Database Bloom Filter ALT: {cyan}{bfalt_dir}')
-    if minout: print(f'[I] minimalistic OUT console: {cyan}Enable')
-    else: print(f'[I] minimalistic OUT console: {red}Disabled')
+    print(f'[I] Version: {color.cyan}{version}')
+    print(f'[I] Start proogramm: {color.cyan}{date_str()}')
+    print(f'[I] Total kernel of CPU: {color.cyan}{cpu_count()}')
+    print(f'[I] Used kernel: {color.cyan}{th}')
+    print(f'[I] Description: {color.cyan}{desc}')
+    print(f'[I] Used ID: {color.cyan}{id}')
+    print(f'[I] iterate word: {color.cyan}{words_iter}')
+    print(f'[I] Save continuation time: {color.cyan}{save}/sec')
+    print(f'[I] Input DATA: {color.cyan}{word}')
+    print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
+    if minout: print(f'[I] minimalistic OUT console: {color.cyan}Enable')
+    else: print(f'[I] minimalistic OUT console: {color.red}Disabled')
     if rnd_word: 
-        print(f'[I] Mode Random generate word: {cyan}Enable')
-    else: print(f'[I] Mode Random generate word: {red}Disabled')
+        print(f'[I] Mode Random generate word: {color.cyan}Enable')
+    else: print(f'[I] Mode Random generate word: {color.red}Disabled')
     if raw1: 
-        print(f'[I] Mode RAW-1 divider: {cyan}Enable')
-        print(f'[I] Divider: {cyan}{div}')
-    else: print(f'[I] Mode RAW-1: {red}Disabled')
-    if raw2: print(f'[I] Mode RAW-2 hasher: {cyan}Enable')
-    else: print(f'[I] Mode RAW-2: {red}Disabled')    
-    if balance_enable: print(f'[I] Check balance BTC: {cyan}Enable')
-    else: print(f'[I] Check balance: {red}Disabled')
-    if telegram_enable: print(f'[I] Send telegram: {cyan}Enable')
-    else: print(f'[I] Send telegram: {red}Disabled')
+        print(f'[I] Mode RAW-1 divider: {color.cyan}Enable')
+        print(f'[I] Divider: {color.cyan}{div}')
+    else: print(f'[I] Mode RAW-1: {color.red}Disabled')
+    if raw2: print(f'[I] Mode RAW-2 hasher: {color.cyan}Enable')
+    else: print(f'[I] Mode RAW-2: {color.red}Disabled')    
+    if telegram_enable: print(f'[I] Send telegram: {color.cyan}Enable')
+    else: print(f'[I] Send telegram: {color.red}Disabled')
     print('-'*70,end='\n')
-    if cbtc: bfbtc.bit, bfbtc.hash, bfbtc.bf = load_BF(bfbtc_dir)
-    if ceth: bfeth.bit, bfeth.hash, bfeth.bf = load_BF(bfeth_dir)
-    if calt: bfalt.bit, bfalt.hash, bfalt.bf = load_BF(bfalt_dir)
-    print(f'{green}Bloomfilter loaded...')
+    currentDirectory = pathlib.Path(bf_dir)
+    currentPattern = "btc*.bin"
+    for currentFile in currentDirectory.glob(currentPattern):  
+        #print(currentFile)
+        list_btc.append(BF(currentFile))
+        cbtc = True
+    currentPattern = "eth*.bin"
+    for currentFile in currentDirectory.glob(currentPattern):  
+        #print(currentFile)
+        list_eth.append(BF(currentFile))
+        ceth = True
+    currentPattern = "alt*.bin"
+    for currentFile in currentDirectory.glob(currentPattern):
+        #print(currentFile)
+        list_alt.append(BF(currentFile))
+        calt = True
+    print(f'[I] {color.green}Bloomfilter loaded...')
     print('-'*70,end='\n')
     co = 0
     total_count = 0
     total_st = time()
-    list_line = th*100
+    if raw1 or raw2:
+        list_line = 10000
+    else:
+        list_line = 5000
     step_print = 0
     l = []
     
@@ -178,40 +163,41 @@ if __name__ == "__main__":
             for iii in range(len(results[ii])):
                 if results[ii][iii][0] == 'btc':
                     if cbtc:
-                        if check_in_bloom(results[ii][iii][3].hex(), bfbtc.bit, bfbtc.hash, bfbtc.bf):
-                            print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                            save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
-                            if telegram_enable:
-                                send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
-                        co += 4
+                        for check in list_btc:
+                            if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
+                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                if telegram_enable:
+                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
+                        co += 3
                     if calt:
-                        if check_in_bloom(results[ii][iii][3].hex(), bfalt.bit, bfalt.hash, bfalt.bf):
-                            print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                            save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
-                            if telegram_enable:
-                                send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                        co += 4
+                        for check in list_alt:
+                            if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
+                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                if telegram_enable:
+                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
+                        co += 3
                 if results[ii][iii][0] == 'eth':
                     if ceth:
-                        if check_in_bloom(results[ii][iii][3], bfeth.bit, bfeth.hash, bfeth.bf):
-                            print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                            save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
-                            if telegram_enable:
-                                send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
+                        for check in list_eth:
+                            if check_in_bloom(results[ii][iii][3], check.bit, check.hash, check.bf):
+                                print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                if telegram_enable:
+                                    send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
                         co += 1
-        if step_print >= 20:
-            try:
-                speed_float, speed_hash = convert_int(co/(time()-st))
-            except:
-                speed_float, speed_hash = 0.0 , 'Key'
-            ww = str(results[ii][iii][1])
-            print(' '*110,end='\r')
-            if minout:
-                print(f'{yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
-            else:
-                print(f'{yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{results[ii][iii][1]} desc:{desc}',end='\r')
-            step_print = 0
-        else: step_print += 1
+        try:
+            speed_float, speed_hash = convert_int(co/(time()-st))
+        except:
+            speed_float, speed_hash = 0.0 , 'Key'
+        ww = str(results[ii][iii][1])
+        print(' '*110,end='\r')
+        if minout:
+            print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
+        else:
+            print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{results[ii][iii][1]} desc:{desc}',end='\r')
+        step_print = 0
         if (int(time()-total_st)) >= save and save != -1:
             save_station_seq(id,results[ii][iii][1])
             save += save

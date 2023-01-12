@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.05/12.01.23'
+version = 'BrainHunt Classic 3.06/12.01.23'
 from lib.function import *
 
 def init_worker():
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     print(f'[I] Used kernel: {color.cyan}{th}')
     print(f'[I] Used file: {color.cyan}{in_file}')
     print(f'[I] Used ID: {color.cyan}{id}')
-    print(f'[I] Database Bloom Filter: {color.cyan}{bf_dir}')
+    print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
     if minout: print(f'[I] minimalistic OUT console: {color.cyan}Enable')
     else: print(f'[I] minimalistic OUT console: {color.red}Disabled')
     if raw: print(f'[I] Input Raw private key: {color.green}Enable')
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                                 co += 3
                         if results[ii][iii][0] == 'eth':
                             if ceth:
-                                for check in list_alt:
+                                for check in list_eth:
                                     if check_in_bloom(results[ii][iii][3], check.bit, check.hash, check.bf):
                                         print(f'\n{color.green}FOUND {date_str()} ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}\n')
                                         save_file('found',f'FOUND {date_str()} ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}')
