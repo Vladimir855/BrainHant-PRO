@@ -6,14 +6,14 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt SEQ 3.05/12.01.23'
+version = 'BrainHunt SEQ 3.07/15.01.23'
 from lib.function import *
 
 def init_worker():
     signal(SIGINT, SIG_IGN)
     
 def createParser():
-    parser = ArgumentParser(description='BrainHunt-SEQ')
+    parser = ArgumentParser(description='BrainHunt SEQ')
     parser.add_argument ('-th', '--threading', action='store', type=int, help='threading', default='1')
     parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='File BF', default='')
     parser.add_argument ('-telegram', '--telegram', action='store_true', help='enable update')
@@ -27,9 +27,11 @@ def createParser():
     parser.add_argument ('-raw2', '--raw2', action='store_true', help='RAW2 Hasher')
     parser.add_argument ('-dbg', '--dbg', action='store_true', help='Debug')
     parser.add_argument ('-div', '--div', action='store', type=int, help='divider', default=-1)
+    parser.add_argument ('-incdec', '--incdec', action='store', type=int, help='IncDec', default='1')
+
     return parser.parse_args().threading, parser.parse_args().database_dir, \
         parser.parse_args().telegram, parser.parse_args().id, parser.parse_args().desc, parser.parse_args().save, \
-        parser.parse_args().minout, parser.parse_args().wordstop, parser.parse_args().word, parser.parse_args().raw1, parser.parse_args().raw2, parser.parse_args().dbg, parser.parse_args().div
+        parser.parse_args().minout, parser.parse_args().wordstop, parser.parse_args().word, parser.parse_args().raw1, parser.parse_args().raw2, parser.parse_args().dbg, parser.parse_args().div, parser.parse_args().incdec
 
 if __name__ == "__main__":
     freeze_support()
@@ -54,8 +56,8 @@ if __name__ == "__main__":
     words_iter:int = 0
     word = ''
     rnd_word = False
-    
-    th, bf_dir, telegram_enable, id, desc, save, minout, words_iter, word, raw1, raw2, dbg, div  = createParser()
+    incdec:int = 1
+    th, bf_dir, telegram_enable, id, desc, save, minout, words_iter, word, raw1, raw2, dbg, div, incdec  = createParser()
 
     data_local = load_configure('setings.json')
     try:
@@ -100,6 +102,9 @@ if __name__ == "__main__":
     print(f'[I] Save continuation time: {color.cyan}{save}/sec')
     print(f'[I] Input DATA: {color.cyan}{word}')
     print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
+    if incdec > 1:
+        print(f'[I] IncDEc: {color.cyan}Enable')
+        print(f'[I] IncDEc: {color.cyan}{incdec}')
     if minout: print(f'[I] minimalistic OUT console: {color.cyan}Enable')
     else: print(f'[I] minimalistic OUT console: {color.red}Disabled')
     if rnd_word: 
@@ -136,9 +141,13 @@ if __name__ == "__main__":
     total_count = 0
     total_st = time()
     if raw1 or raw2:
-        list_line = 10000
+        if incdec > 1:
+            list_line = int(10000/100)
+        else: list_line = 10000
     else:
-        list_line = 5000
+        if incdec > 1:
+            list_line = int(5000/100)
+        else: list_line = 5000
     step_print = 0
     l = []
     
@@ -156,7 +165,7 @@ if __name__ == "__main__":
     while True:
         st = time()
         total_count += list_line
-        l = gen_hash([word,list_line,cbtc,calt,ceth,raw1,raw2, dbg, div])
+        l = gen_hash([word,list_line,cbtc,calt,ceth,raw1,raw2, dbg, div, incdec])
         st = time()
         results = pool.map(bw_seq, l)
         for ii in range(len(results)):
@@ -169,7 +178,7 @@ if __name__ == "__main__":
                                 save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
                                 if telegram_enable:
                                     send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
-                        co += 3
+                            co += 1
                     if calt:
                         for check in list_alt:
                             if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
@@ -177,7 +186,7 @@ if __name__ == "__main__":
                                 save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
                                 if telegram_enable:
                                     send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                        co += 3
+                            co += 1
                 if results[ii][iii][0] == 'eth':
                     if ceth:
                         for check in list_eth:
@@ -186,7 +195,7 @@ if __name__ == "__main__":
                                 save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
                                 if telegram_enable:
                                     send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
-                        co += 1
+                            co += 1
         try:
             speed_float, speed_hash = convert_int(co/(time()-st))
         except:

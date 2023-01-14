@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.06/12.01.23'
+version = 'BrainHunt Classic 3.12/15.01.23'
 from lib.function import *
 
 def init_worker():
@@ -23,7 +23,10 @@ def createParser():
     parser.add_argument ('-save', '--save', action='store', type=int, help='save continue sec', default='60')
     parser.add_argument ('-minout', '--minout', action='store_true', help='minimal out console')
     parser.add_argument ('-raw', '--raw', action='store_true', help='input raw')
-    return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().infile, parser.parse_args().telegram, parser.parse_args().id, parser.parse_args().desc, parser.parse_args().save, parser.parse_args().minout, parser.parse_args().raw
+    parser.add_argument ('-incdec', '--incdec', action='store', type=int, help='IncDec', default='1')
+
+    return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().infile, parser.parse_args().telegram, parser.parse_args().id, parser.parse_args().desc, \
+        parser.parse_args().save, parser.parse_args().minout, parser.parse_args().raw, parser.parse_args().incdec
         
 if __name__ == "__main__":
     freeze_support()
@@ -47,7 +50,8 @@ if __name__ == "__main__":
     save = 30
     minout = False
     raw:bool = False
-    th, bf_dir, in_file, telegram_enable, id, desc, save, minout, raw  = createParser()
+    incdec:int = 1
+    th, bf_dir, in_file, telegram_enable, id, desc, save, minout, raw, incdec  = createParser()
 
     data_local = load_configure('setings.json')
     try:
@@ -75,6 +79,9 @@ if __name__ == "__main__":
     print(f'[I] Used file: {color.cyan}{in_file}')
     print(f'[I] Used ID: {color.cyan}{id}')
     print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
+    if incdec > 1:
+        print(f'[I] IncDEc: {color.cyan}Enable')
+        print(f'[I] IncDEc: {color.cyan}{incdec}')
     if minout: print(f'[I] minimalistic OUT console: {color.cyan}Enable')
     else: print(f'[I] minimalistic OUT console: {color.red}Disabled')
     if raw: print(f'[I] Input Raw private key: {color.green}Enable')
@@ -110,9 +117,13 @@ if __name__ == "__main__":
     l = []
     file = ''
     if raw:
-        list_line = 10000
+        if incdec > 1:
+            list_line = int(10000/100)
+        else: list_line = 10000
     else:
-        list_line = 5000
+        if incdec > 1:
+            list_line = int(5000/100)
+        else: list_line = 5000
     total_count = 0
     total_st = time()
     station = continue_point
@@ -133,7 +144,7 @@ if __name__ == "__main__":
                     line_co = 0
                     station = -1
                     t = False
-            l.append([line,raw,cbtc,calt,ceth])
+            l.append([line,raw,cbtc,calt,ceth,incdec])
             if line_co == list_line:
                 total_count += list_line
                 line_co = 0
@@ -149,7 +160,7 @@ if __name__ == "__main__":
                                         save_file('found',f'FOUND {date_str()} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
                                             send_telegram(f'FOUND {date_str()} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
-                                co += 3
+                                    co += 1
                             if calt:
                                 for check in list_alt:
                                     if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
@@ -157,7 +168,7 @@ if __name__ == "__main__":
                                         save_file('found',f'FOUND {date_str()} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
                                             send_telegram(f'FOUND {date_str()} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
-                                co += 3
+                                    co += 1
                         if results[ii][iii][0] == 'eth':
                             if ceth:
                                 for check in list_eth:
@@ -166,7 +177,7 @@ if __name__ == "__main__":
                                         save_file('found',f'FOUND {date_str()} ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
                                             send_telegram(f'FOUND {date_str()} ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
-                                co += 1
+                                    co += 1
                 try:
                     speed_float, speed_hash = convert_int(co/(time()-st))
                 except:
@@ -181,10 +192,10 @@ if __name__ == "__main__":
                     ww = str(results[ii][iii][1])
                 if minout:
                     print(' '*110,end='\r')
-                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count*incdec}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
                 else:
                     print(' '*110,end='\r')
-                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{results[ii][iii][1]} desc:{desc}',end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count*incdec}, Speed:{speed_float} {speed_hash} ID:{id} word:{results[ii][iii][1]} desc:{desc}',end='\r')
                 step_print = 0
                 if (int(time()-total_st)) >= save:
                     save_station(id,total_count)
