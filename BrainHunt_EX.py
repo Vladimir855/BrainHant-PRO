@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt EX 3.07/15.01.23'
+version = 'BrainHunt EX 3.08/16.01.23'
 from lib.function import *
 
 def init_worker():

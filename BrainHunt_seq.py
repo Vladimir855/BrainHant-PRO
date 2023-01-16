@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt SEQ 3.07/15.01.23'
+version = 'BrainHunt SEQ 3.08/16.01.23'
 from lib.function import *
 
 def init_worker():
@@ -175,26 +175,26 @@ if __name__ == "__main__":
                         for check in list_btc:
                             if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
                                 print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
                     if calt:
                         for check in list_alt:
                             if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
-                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
                 if results[ii][iii][0] == 'eth':
                     if ceth:
                         for check in list_eth:
                             if check_in_bloom(results[ii][iii][3], check.bit, check.hash, check.bf):
-                                print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}')
+                                print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
         try:
             speed_float, speed_hash = convert_int(co/(time()-st))

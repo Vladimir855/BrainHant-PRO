@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'LIB 3.0/15.01.23'
+version_lib = 'LIB 3.1/16.01.23'
 
 from multiprocessing import Pool, freeze_support, cpu_count
 from time import time, sleep
@@ -114,74 +114,81 @@ def bw(input_list):
     if raw:
         pvk_i = int(text,16)
         pub_raw = scalar_multiplication(pvk_i)
-        current_pvk = pvk_i + 1
+        current_pvk1 = pvk_i + 1
+        current_pvk2 = pvk_i - 1
         f1 = []
         if cb or ca:
-            f1.append(['btc', text, pvk_i, pubkey_to_h160(0, False, pub_raw),'RAW'])
-            f1.append(['btc', text ,pvk_i, pubkey_to_h160(0, True, pub_raw),'RAW'])
-            f1.append(['btc', text, pvk_i, pubkey_to_h160(1, True, pub_raw),'RAW'])
+            f1.append(['btc', text, pvk_i, pubkey_to_h160(0, False, pub_raw),'BTC/ALT RAW'])
+            f1.append(['btc', text ,pvk_i, pubkey_to_h160(0, True, pub_raw),'BTC/ALT RAW'])
+            f1.append(['btc', text, pvk_i, pubkey_to_h160(1, True, pub_raw),'BTC/ALT RAW'])
             if incdec > 1:
                 res_pub = point_sequential_increment(incdec, pub_raw)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, current_pvk+dec2, pubkey_to_h160(0, False, pub2),'RAW'])
-                    f1.append(['btc', text ,current_pvk+dec2, pubkey_to_h160(0, True, pub2),'RAW'])
-                    f1.append(['btc', text, current_pvk+dec2, pubkey_to_h160(1, True, pub2),'RAW'])
+                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(0, False, pub2),'BTC/ALT RAW INC'])
+                    f1.append(['btc', text ,current_pvk1+dec2, pubkey_to_h160(0, True, pub2),'BTC/ALT RAW INC'])
+                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(1, True, pub2),'BTC/ALT RAW INC'])
                 res_pub = point_sequential_decrement(incdec, pub_raw)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, current_pvk-dec2, pubkey_to_h160(0, False, pub2),'RAW'])
-                    f1.append(['btc', text ,current_pvk-dec2, pubkey_to_h160(0, True, pub2),'RAW'])
-                    f1.append(['btc', text, current_pvk-dec2, pubkey_to_h160(1, True, pub2),'RAW'])
+                    f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(0, False, pub2),'BTC/ALT RAW DEC'])
+                    f1.append(['btc', text ,current_pvk2-dec2, pubkey_to_h160(0, True, pub2),'BTC/ALT RAW DEC'])
+                    f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(1, True, pub2),'BTC/ALT RAW DEC'])
         if ce:
-            f1.append(['eth', text, pvk_i, pubkey_to_ETH_address(pub_raw)[2:],'RAW'])
+            f1.append(['eth', text, pvk_i, pubkey_to_ETH_address(pub_raw)[2:],'ETH RAW'])
             if incdec > 1:
                 res_pub = point_sequential_increment(incdec, pub_raw)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['eth', text, current_pvk+dec2, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                    f1.append(['eth', text, current_pvk1+dec2, pubkey_to_ETH_address(pub2)[2:],'ETH RAW INC'])
                 res_pub = point_sequential_decrement(incdec, pub_raw)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['eth', text, current_pvk-dec2, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                    f1.append(['eth', text, current_pvk2-dec2, pubkey_to_ETH_address(pub2)[2:],'ETH RAW DEC'])
         return f1
     else:
         f1 = []
         if cb or ca:
             binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
             hash_sha256 = get_sha256(binary_data).hex()
-            pub_sha256 = scalar_multiplication(int(hash_sha256,16))
-            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, pub_sha256),'SHA256'])
-            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, True, pub_sha256),'SHA256'])
-            f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, pub_sha256),'SHA256'])
+            pvk_i = int(hash_sha256,16)
+            pub_sha256 = scalar_multiplication(pvk_i)
+            current_pvk1 = pvk_i + 1
+            current_pvk2 = pvk_i - 1
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, pub_sha256),'BTC/ALT'])
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, True, pub_sha256),'BTC/ALT'])
+            f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, pub_sha256),'BTC/ALT'])
             if incdec > 1:
                 res_pub = point_sequential_increment(incdec,pub_sha256)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, res_pub),'RAW'])
-                    f1.append(['btc', text ,hash_sha256, pubkey_to_h160(0, True, res_pub),'RAW'])
-                    f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, res_pub),'RAW'])
+                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(0, False, res_pub),'BTC/ALT INC'])
+                    f1.append(['btc', text ,current_pvk1+dec2, pubkey_to_h160(0, True, res_pub),'BTC/ALT INC'])
+                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(1, True, res_pub),'BTC/ALT INC'])
                 res_pub = point_sequential_decrement(incdec,pub_sha256)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, res_pub),'RAW'])
-                    f1.append(['btc', text ,hash_sha256, pubkey_to_h160(0, True, res_pub),'RAW'])
-                    f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, res_pub),'RAW'])
+                    f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(0, False, res_pub),'BTC/ALT DEC'])
+                    f1.append(['btc', text ,current_pvk2-dec2, pubkey_to_h160(0, True, res_pub),'BTC/ALT DEC'])
+                    f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(1, True, res_pub),'BTC/ALT DEC'])
         if ce:
             k = keccak.new(digest_bits=256)
             k.update(binary_data)
             hash_keccak_256 = k.hexdigest()
-            pub_keccak_256 = scalar_multiplication(int(hash_keccak_256,16))
-            f1.append(['eth',text,hash_keccak_256,pubkey_to_ETH_address(pub_keccak_256)[2:],'keccak256'])
+            pvk_i = int(hash_keccak_256,16)
+            pub_keccak_256 = scalar_multiplication(pvk_i)
+            current_pvk1 = pvk_i + 1
+            current_pvk2 = pvk_i - 1
+            f1.append(['eth',text,hash_keccak_256,pubkey_to_ETH_address(pub_keccak_256)[2:],'ETH'])
             if incdec > 1:
                 res_pub = point_sequential_increment(incdec, pub_keccak_256)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['eth', text, hash_keccak_256, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                    f1.append(['eth', text, current_pvk1+dec2, pubkey_to_ETH_address(pub2)[2:],'ETH INC'])
                 res_pub = point_sequential_decrement(incdec,pub_keccak_256)
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['eth', text, hash_keccak_256, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                    f1.append(['eth', text, current_pvk2-dec2, pubkey_to_ETH_address(pub2)[2:],'ETH DEC'])
         return f1
 
 def bw_seq(text):
@@ -197,36 +204,37 @@ def bw_seq(text):
     f1 = []
     pvk = h if isinstance(h, int) else int(h, 16)
     pub = scalar_multiplication(pvk)
-    current_pvk = pvk + 1
+    current_pvk1 = pvk + 1
+    current_pvk2 = pvk - 1
     if cb or ca:
-        f1.append(['btc',w,pvk,pubkey_to_h160(0, False, pub)])
-        f1.append(['btc',w,pvk,pubkey_to_h160(0, True, pub)])
-        f1.append(['btc',w,pvk,pubkey_to_h160(1, True, pub)])
-        f1.append(['btc',w,pvk,pubkey_to_h160(2, True, pub)])
+        f1.append(['btc',w,pvk,pubkey_to_h160(0, False, pub), 'BTC/ALT'])
+        f1.append(['btc',w,pvk,pubkey_to_h160(0, True, pub), 'BTC/ALT'])
+        f1.append(['btc',w,pvk,pubkey_to_h160(1, True, pub), 'BTC/ALT'])
+        f1.append(['btc',w,pvk,pubkey_to_h160(2, True, pub), 'BTC/ALT'])
         if incdec > 1:
             res_pub = point_sequential_increment(incdec, pub)
             for dec2 in range(incdec):
                 pub2 = res_pub[dec2*65:dec2*65+65]
-                f1.append(['btc', w, current_pvk+dec2, pubkey_to_h160(0, False, res_pub),'RAW'])
-                f1.append(['btc', w, current_pvk+dec2, pubkey_to_h160(0, True, res_pub),'RAW'])
-                f1.append(['btc', w, current_pvk+dec2, pubkey_to_h160(1, True, res_pub),'RAW'])
+                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(0, False, res_pub),'BTC/ALT INC'])
+                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(0, True, res_pub),'BTC/ALT INC'])
+                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(1, True, res_pub),'BTC/ALT INC'])
             res_pub = point_sequential_decrement(incdec, pub)
             for dec2 in range(incdec):
                 pub2 = res_pub[dec2*65:dec2*65+65]
-                f1.append(['btc', w, current_pvk-dec2, pubkey_to_h160(0, False, res_pub),'RAW'])
-                f1.append(['btc', w, current_pvk-dec2, pubkey_to_h160(0, True, res_pub),'RAW'])
-                f1.append(['btc', w, current_pvk-dec2, pubkey_to_h160(1, True, res_pub),'RAW'])
+                f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(0, False, res_pub),'BTC/ALT DEC'])
+                f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(0, True, res_pub),'BTC/ALT DEC'])
+                f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(1, True, res_pub),'BTC/ALT DEC'])
     if ce:
-        f1.append(['eth', w, pvk, pubkey_to_ETH_address(pub)[2:]])
+        f1.append(['eth', w, pvk, pubkey_to_ETH_address(pub)[2:], 'ETH'])
         if incdec > 1:
             res_pub = point_sequential_increment(incdec, pub)
             for dec2 in range(incdec):
                 pub2 = res_pub[dec2*65:dec2*65+65]
-                f1.append(['eth', w, current_pvk+dec2, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                f1.append(['eth', w, current_pvk1+dec2, pubkey_to_ETH_address(pub2)[2:],'ETH INC'])
             res_pub = point_sequential_decrement(incdec, pub)
             for dec2 in range(incdec):
                 pub2 = res_pub[dec2*65:dec2*65+65]
-                f1.append(['eth', w, current_pvk-dec2, pubkey_to_ETH_address(pub2)[2:],'RAW'])
+                f1.append(['eth', w, current_pvk2-dec2, pubkey_to_ETH_address(pub2)[2:],'ETH DEC'])
     return f1
 
 def text2sha256(string):
