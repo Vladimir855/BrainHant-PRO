@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.13/16.01.23'
+version = 'BrainHunt Classic 3.14/17.01.23'
 from lib.function import *
 
 def init_worker():
@@ -30,7 +30,7 @@ def createParser():
         
 if __name__ == "__main__":
     freeze_support()
-    print(color.clear_screen)
+    cls()
     telegram_token:str = ''
     telegram_channel_id:str = ''
     telegram_enable:bool = False
@@ -106,11 +106,11 @@ if __name__ == "__main__":
         #print(currentFile)
         list_alt.append(BF(currentFile))
         calt = True
-    print(f'[I] {color.green}Bloomfilter loaded...')
-    print('-'*70,end='\n')
     if len(list_btc) + len(list_eth) + len(list_alt) == 0:
         print(f'{color.red}bloom filters not found in folder {bf_dir}')
         exit(0)
+    print(f'[I] {color.green}Bloomfilter loaded...')
+    print('-'*70,end='\n')
     line_co = 0
     step_print = 0
     co = 0
