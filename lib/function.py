@@ -48,6 +48,9 @@ class BF():
             print(f'[E] File bloomfilter: {file_bf} not found.')
             exit(1)
 
+def cls():
+    system('cls' if name=='nt' else 'clear')
+    
 def gen_word():
     word = ''.join(secrets.choice(alphabet) for i in range(random.randrange(2,32)))
     return ''.join(word)
