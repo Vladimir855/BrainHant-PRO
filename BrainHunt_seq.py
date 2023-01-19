@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt SEQ 3.09/17.01.23'
+version = 'BrainHunt SEQ 3.10/19.01.23'
 from lib.function import *
 
 def init_worker():
@@ -93,6 +93,7 @@ if __name__ == "__main__":
 
     print('-'*70,end='\n')
     print(f'[I] Version: {color.cyan}{version}')
+    print(f'[I] Version LIB: {color.cyan}{version_lib}')
     print(f'[I] Start proogramm: {color.cyan}{date_str()}')
     print(f'[I] Total kernel of CPU: {color.cyan}{cpu_count()}')
     print(f'[I] Used kernel: {color.cyan}{th}')
@@ -171,50 +172,50 @@ if __name__ == "__main__":
         l = gen_hash([word,list_line,cbtc,calt,ceth,raw1,raw2, dbg, div, incdec])
         st = time()
         results = pool.map(bw_seq, l)
-        for ii in range(len(results)):
-            for iii in range(len(results[ii])):
-                if results[ii][iii][0] == 'btc':
+        for map_res in results:
+            for res in map_res:
+                if res[0] == 'btc':
                     if cbtc:
                         for check in list_btc:
-                            if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
-                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
+                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                                print(f'\nFOUND word:{res[1]} PVK:{(res[2])} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
                     if calt:
                         for check in list_alt:
-                            if check_in_bloom(results[ii][iii][3].hex(), check.bit, check.hash, check.bf):
-                                print(f'\nFOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
+                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                                print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
-                if results[ii][iii][0] == 'eth':
+                if res[0] == 'eth':
                     if ceth:
                         for check in list_eth:
-                            if check_in_bloom(results[ii][iii][3], check.bit, check.hash, check.bf):
-                                print(f'\nFOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id} desc:{desc}')
+                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                                print(f'\nFOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
+                                save_file('found',f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND ETH:0x{results[ii][iii][3]} word:{results[ii][iii][1]} PVK:{(results[ii][iii][2])} Algo:{results[ii][iii][4]} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id}desc:{desc}', telegram_channel_id, telegram_token)
                             co += 1
         try:
             speed_float, speed_hash = convert_int(co/(time()-st))
         except:
             speed_float, speed_hash = 0.0 , 'Key'
-        ww = str(results[ii][iii][1])
+        ww = str(res[1])
         print(' '*110,end='\r')
         if minout:
             print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
         else:
-            print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{results[ii][iii][1]} desc:{desc}',end='\r')
+            print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
         step_print = 0
         if (int(time()-total_st)) >= save and save != -1:
-            save_station_seq(id,results[ii][iii][1])
+            save_station_seq(id,res[1])
             save += save
         co = 0
-        word = results[ii][iii][1]
+        word = res[1]
         results = []
         l = []
         if words_iter < 0: pass
