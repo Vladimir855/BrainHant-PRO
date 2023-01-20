@@ -193,10 +193,10 @@ if __name__ == "__main__":
                     ww = str(res[1])
                 if minout:
                     print(' '*110,end='\r')
-                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count*incdec}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
                 else:
                     print(' '*110,end='\r')
-                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count*incdec}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
                 step_print = 0
                 if (int(time()-total_st)) >= save:
                     save_station(id,total_count)
