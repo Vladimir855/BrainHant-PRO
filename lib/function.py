@@ -188,6 +188,7 @@ def bw(input_list):
                     f1.append(['btc', text ,current_pvk2-dec2, pubkey_to_h160(0, True, res_pub).hex(),f'BTC/ALT DEC {dec2}'])
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(1, True, res_pub).hex(),f'BTC/ALT DEC {dec2}'])
         if ce:
+            binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
             k = keccak.new(digest_bits=256)
             k.update(binary_data)
             hash_keccak_256 = k.hexdigest()
