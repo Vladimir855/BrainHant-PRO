@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt SEQ 3.10/19.01.23'
+version = 'BrainHunt SEQ 3.13/27.01.23'
 from lib.function import *
 
 def init_worker():
@@ -120,37 +120,40 @@ if __name__ == "__main__":
     if telegram_enable: print(f'[I] Send telegram: {color.cyan}Enable')
     else: print(f'[I] Send telegram: {color.red}Disabled')
     print('-'*70,end='\n')
-    currentDirectory = pathlib.Path(bf_dir)
-    currentPattern = "btc*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):  
-        #print(currentFile)
-        list_btc.append(BF(currentFile))
+    mask = "btc*.dat"
+    list_btc = load_bf(bf_dir, mask)
+    if len(list_btc) != 0:
         cbtc = True
-    currentPattern = "eth*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):  
-        #print(currentFile)
-        list_eth.append(BF(currentFile))
-        ceth = True
-    currentPattern = "alt*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):
-        #print(currentFile)
-        list_alt.append(BF(currentFile))
+    mask = "alt*.dat"
+    list_alt = load_bf(bf_dir, mask)
+    if len(list_alt) != 0:
         calt = True
+    mask = "eth*.dat"
+    list_eth = load_bf(bf_dir, mask)
+    if len(list_eth) != 0:
+        ceth = True
     if len(list_btc) + len(list_eth) + len(list_alt) == 0:
         print(f'{color.red}bloom filters not found in folder {bf_dir}')
         exit(0)
     print(f'[I] {color.green}Bloomfilter loaded...')
+    print('-'*70,end='\n')
+    if cbtc: 
+        print(f'[I] Bloom Work:{color.cyan}BTC')
+    if calt: 
+        print(f'[I] Bloom Work:{color.cyan}ALT')
+    if ceth: 
+        print(f'[I] Bloom Work:{color.cyan}ETH')
     print('-'*70,end='\n')
     co = 0
     total_count = 0
     total_st = time()
     if raw1 or raw2:
         if incdec > 1:
-            list_line = int(10000/100)
+            list_line = int(10000/10)
         else: list_line = 10000
     else:
         if incdec > 1:
-            list_line = int(5000/100)
+            list_line = int(5000/10)
         else: list_line = 5000
     step_print = 0
     l = []
@@ -177,7 +180,7 @@ if __name__ == "__main__":
                 if res[0] == 'btc':
                     if cbtc:
                         for check in list_btc:
-                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                            if bloom_check(check, res[3], len(res[3])):
                                 print(f'\nFOUND word:{res[1]} PVK:{(res[2])} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
@@ -185,7 +188,7 @@ if __name__ == "__main__":
                             co += 1
                     if calt:
                         for check in list_alt:
-                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                            if bloom_check(check, res[3], len(res[3])):
                                 print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:
@@ -194,7 +197,7 @@ if __name__ == "__main__":
                 if res[0] == 'eth':
                     if ceth:
                         for check in list_eth:
-                            if check_in_bloom(res[3], check.bit, check.hash, check.bf):
+                            if bloom_check(check, res[3], len(res[3])):
                                 print(f'\nFOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
                                 save_file('found',f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
                                 if telegram_enable:

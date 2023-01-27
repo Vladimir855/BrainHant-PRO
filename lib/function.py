@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version_lib = 'LIB 3.3/19.01.23'
+version_lib = 'LIB 3.4/27.01.23'
 
 from multiprocessing import Pool, freeze_support, cpu_count
 from time import time, sleep
@@ -16,16 +16,19 @@ from codecs import open
 from urllib.request import urlopen
 from requests import get
 from sys import stdin
-from os import path, environ, mkdir, system, name
+from os import path, environ, mkdir, system, name, makedirs
 from datetime import datetime
 from Crypto.Hash import keccak
 import glob, pathlib
 from io import TextIOWrapper
 from json import loads, dump
-from .secp256k1_lib import privatekey_to_ETH_address, pubkey_to_h160, scalar_multiplication, pubkey_to_ETH_address, get_sha256, read_bloom_file, check_in_bloom, point_sequential_increment, point_sequential_decrement
+from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, pubkey_to_ETH_address, get_sha256, point_sequential_increment, point_sequential_decrement
+from .libnon import bloom_loadcustom, bloom_free, bloom_print, bloom, init_bloom, bloom_check, bloom_reset
+
 from bitcoin import mul_privkeys, inv, N, random_key
 import string, secrets, random
 from colorama import Back, Fore, Style, init
+import logging
 init(autoreset = True)
 
 alphabet = string.ascii_letters + string.digits
@@ -40,13 +43,24 @@ class color:
     back = '\033[1A'
     clear_screen = '\x1b[2J'
 
-class BF():
-    def __init__(self, file_bf) -> None:
-        if path.exists(file_bf):
-            self.bit, self.hash, self.bf = read_bloom_file(file_bf)
+def load_bf(path, mask):
+    bf_list = []
+    path = path.replace('\\', '/')
+    if path[-1] != '\\' or path[-1] != '/':
+        path += '/'
+    # mask_file = ["btc*.dat", "alt*.dat", "eth*.dat"]
+    # for mask in mask_file:
+    currentDirectory = pathlib.Path(path)
+    for currentFile in currentDirectory.glob(mask):
+        bf = bloom()
+        result = bloom_loadcustom(bf, path+currentFile.stem)
+        if result == 0:
+            pass
         else:
-            print(f'[E] File bloomfilter: {file_bf} not found.')
-            exit(1)
+            print("Error load the filter")
+            exit()
+        bf_list.append(bf)
+    return bf_list
 
 def cls():
     system('cls' if name=='nt' else 'clear')
@@ -87,7 +101,7 @@ def save_file(infile, text):
         file = f'log/{infile}.log'
         f = open(file, 'a', encoding='utf-8', errors='ignore')
         f.close()
-
+        
 def load_configure(file):
     if path.exists(file):
         with open(file, 'r', encoding='utf-8') as f:
