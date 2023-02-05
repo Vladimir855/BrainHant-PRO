@@ -1,7 +1,17 @@
+# #!/usr/bin/python3
+# encoding=utf-8
+# -*- coding: utf-8 -*-
+"""
+@author: NonameHUNT
+@GitHub: https://github.com/Noname400
+@telegram: https://t.me/NonameHunt
+"""
 import bitcoin
 import random, math
 from decimal import Decimal
-from lib.secp256k1_lib import pubkey_to_ETH_address, hash_to_address, pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, read_bloom_file, check_in_bloom
+from lib.secp256k1_lib import pubkey_to_ETH_address, hash_to_address, pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement
+from lib.libhunt import LibHUNT, version_LIB
+from lib.function import *
 from time import time
 from random import randint
 from sys import argv
@@ -11,91 +21,75 @@ import glob, pathlib
 from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
-class color:
-    yellow = Fore.YELLOW+Style.BRIGHT
-    red = Fore.RED+Style.BRIGHT
-    clear = Style.RESET_ALL
-    green = Fore.GREEN+Style.BRIGHT
-    blink = Fore.RED+Style.DIM
-    cyan = Fore.CYAN+Style.BRIGHT
-    back = '\033[1A'
-    clear_screen = '\x1b[2J'
+version = '2.0 / 05.02.23'
 
-version = '1.2'
+def init_worker():
+    signal(SIGINT, SIG_IGN)
 
-def cls():
-    system('cls' if name=='nt' else 'clear')
+def createParser():
+    parser = ArgumentParser(description='BrainHunt')
+    parser.add_argument ('-th', '--threading',       action='store', type=int, help='threading', default='1')
+    parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='File BF', default='')
+    parser.add_argument ('-start', '--start',        action='store', type=str, help='start range', default='')
+    parser.add_argument ('-end',   '--end',          action='store', type=str, help='end range', default='')
+    parser.add_argument ('-group', '--group',        action='store', type=int, help='group size', default='50000')
+    parser.add_argument ('-startdiv', '--startdiv',  action='store', type=int, help='description', default='1000')
+    parser.add_argument ('-incdiv', '--incdiv',      action='store', type=int, help='save continue sec', default='100')
+    parser.add_argument ('-inccycle', '--inccycle',  action='store', type=int, help='minimal out console', default='100')
+    parser.add_argument ('-divcicle', '--divcicle',  action='store', type=int, help='input raw', default='100000')
 
-class BF():
-    def __init__(self, file_bf) -> None:
-        if path.exists(file_bf):
-            self.bit, self.hash, self.bf = read_bloom_file(file_bf)
-        else:
-            print(f'[E] File bloomfilter: {file_bf} not found.')
-            exit(1)
+    return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().start, parser.parse_args().end, parser.parse_args().group, parser.parse_args().startdiv, \
+        parser.parse_args().incdiv, parser.parse_args().inccycle, parser.parse_args().divcicle
+        
 
-def save_file(infile, text):
-    if path.exists('log'):
-        file = f'log/{infile}.log'
-        f = open(file, 'a', encoding='utf-8', errors='ignore')
-        f.write(f'[*] {text} \n')
-        f.close()
-    else:
-        mkdir('log')
-        file = f'log/{infile}.log'
-        f = open(file, 'a', encoding='utf-8', errors='ignore')
-        f.close()
-    
-def convert_int(num:int):
-    dict_suffix = {0:'key', 1:'Kkey', 2:'Mkey', 3:'Gkey', 4:'Tkey', 5:'Pkey', 6:'Ekeys'}
-    num *= 2.0
-    idx = 0
-    for ii in range(len(dict_suffix)-1):
-        if int(num/1000) > 0:
-            idx += 1
-            num /= 1000
-    return ('%.2f'%num), dict_suffix[idx]
+if __name__ == "__main__":
+    freeze_support()
+    cls()
+    th, bf_dir, start, end, groud_size, start_div, inc_div, inc_cycle, div_cicle  = createParser()
 
-def seq(dir):
     list_btc:list = []
     list_eth:list = []
     list_alt:list = []
     cbtc:bool = False
     ceth:bool = False
     calt:bool = False
-    fff = 1000 # Начальный делитель Аналог 1.00
-    fff1 = 100 # Прирощение делителя Аналог 0.01
-    group_size = 50000 # Сколько проверять в + и в -
-    begin_key = randint(2**255,2**256)
-    cycle1 = 100 # Количество циклов на прирощение делителя
-    cycle2 = 100000 # Количество циклов деления (чем меньше делитель тем больше циклов надо)
+    fff = start_div # Начальный делитель Аналог 1.00
+    fff1 = inc_div # Прирощение делителя Аналог 0.01
+    group_size = groud_size # Сколько проверять в + и в -
+    begin_key = randint(start, end)
+    cycle1 = inc_cycle # Количество циклов на прирощение делителя
+    cycle2 = div_cicle # Количество циклов деления (чем меньше делитель тем больше циклов надо)
     l = []
     counter = 0
     total = 0
     plus = 0
     print('-'*70,end='\n')
-    currentDirectory = pathlib.Path(dir)
-    currentPattern = "btc*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):  
-        #print(currentFile)
-        list_btc.append(BF(currentFile))
+    mask = "btc*.bin"
+    list_btc = load_bf(bf_dir, mask)
+    if len(list_btc) != 0:
         cbtc = True
-    currentPattern = "eth*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):  
-        #print(currentFile)
-        list_eth.append(BF(currentFile))
-        ceth = True
-    currentPattern = "alt*.bin"
-    for currentFile in currentDirectory.glob(currentPattern):
-        #print(currentFile)
-        list_alt.append(BF(currentFile))
+    mask = "alt*.bin"
+    list_alt = load_bf(bf_dir, mask)
+    if len(list_alt) != 0:
         calt = True
+    mask = "eth*.bin"
+    list_eth = load_bf(bf_dir, mask)
+    if len(list_eth) != 0:
+        ceth = True
     if len(list_btc) + len(list_eth) + len(list_alt) == 0:
-        print(f'{color.red}bloom filters not found in folder {dir}')
+        print(f'{color.red}bloom filters not found in folder {bf_dir}')
         exit(0)
     print(f'[I] {color.green}Bloomfilter loaded...')
     print('-'*70,end='\n')
-
+    if cbtc: 
+        print(f'[I] Bloom Work:{color.cyan}BTC')
+    if calt: 
+        print(f'[I] Bloom Work:{color.cyan}ALT')
+    if ceth: 
+        print(f'[I] Bloom Work:{color.cyan}ETH')
+    print('-'*70,end='\n')
+    list_btc.extend(list_alt)
+    list_alt = []
     while True:
         for _ in range(cycle1):
             counter = 0
@@ -121,25 +115,12 @@ def seq(dir):
                 Pv = point_sequential_increment(group_size, P)
                 for t in range(group_size):
                     pub = Pv[t*65:t*65+65]
-                    if cbtc:
+                    if cbtc or calt:
                         hash160 = pubkey_to_h160(0,True,pub)
                         hash160_u = pubkey_to_h160(0,False,pub)
                         hash160_3 = pubkey_to_h160(1,True,pub)
-                        for check in list_btc:
-                            if check_in_bloom(hash160.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_u.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_3.hex(), check.bit, check.hash, check.bf):
-                                if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
-                                    l.append(hash160.hex())
-                                    l.append(hash160_u.hex())
-                                    l.append(hash160_3.hex())
-                            counter += 1
-                    if calt:
-                        hash160 = pubkey_to_h160(0,True,pub)
-                        hash160_u = pubkey_to_h160(0,False,pub)
-                        hash160_3 = pubkey_to_h160(1,True,pub)
-                        for check in list_btc:
-                            if check_in_bloom(hash160.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_u.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_3.hex(), check.bit, check.hash, check.bf):
+                        for BF in list_btc:
+                            if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
@@ -150,7 +131,7 @@ def seq(dir):
                     if ceth:
                         eth = pubkey_to_ETH_address(pub)[2:]
                         for check in list_eth:
-                            if check_in_bloom(eth, check.bit, check.hash, check.bf):
+                            if BF.check(check, eth, len(eth)):
                                 if eth not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth} ')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth}\n')
@@ -162,12 +143,12 @@ def seq(dir):
                 Pv = point_sequential_decrement(group_size, P)
                 for t in range(group_size):
                     pub = Pv[t*65:t*65+65]
-                    if cbtc:
+                    if cbtc or calt:
                         hash160 = pubkey_to_h160(0,True,pub)
                         hash160_u = pubkey_to_h160(0,False,pub)
                         hash160_3 = pubkey_to_h160(1,True,pub)
-                        for check in list_btc:
-                            if check_in_bloom(hash160.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_u.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_3.hex(), check.bit, check.hash, check.bf):
+                        for BF in list_btc:
+                            if BF.check(check, hash160, len(hash160)) or BF.check(check, hash160_u, len(hash160_u)) or BF.check(check, hash160_3, len(hash160_3)):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
@@ -175,23 +156,10 @@ def seq(dir):
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
                         counter += 1
-                    if calt:
-                        hash160 = pubkey_to_h160(0,True,pub)
-                        hash160_u = pubkey_to_h160(0,False,pub)
-                        hash160_3 = pubkey_to_h160(1,True,pub)
-                        for check in list_btc:
-                            if check_in_bloom(hash160.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_u.hex(), check.bit, check.hash, check.bf) or check_in_bloom(hash160_3.hex(), check.bit, check.hash, check.bf):
-                                if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
-                                    l.append(hash160.hex())
-                                    l.append(hash160_u.hex())
-                                    l.append(hash160_3.hex())
-                            counter += 1
                     if ceth:
                         eth = pubkey_to_ETH_address(pub)[2:]
-                        for check in list_eth:
-                            if check_in_bloom(eth, check.bit, check.hash, check.bf):
+                        for BF in list_eth:
+                            if BF.check(check, eth, len(eth)):
                                 if eth not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth} ')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth}\n')
@@ -201,16 +169,3 @@ def seq(dir):
                 print(f'[+] Total Keys Checked : {total}  F:{fff:.2f} PVK:{hex(n)[:12]}... [ Speed : {counter/(time() - st):.2f} Keys/s ] ', end='\r')
                 counter = 0
         plus += 1
-if __name__ == "__main__":  
-    cls()
-    bf_dir = argv[1]
-    # file_in = argv[1]
-    # file_out = argv[2]
-    # if len (argv) < 3:
-    #     print ("[E] Error. Too few options.")
-    #     exit(1)
-
-    # if len (argv) > 3:
-    #     print ("[E] Error. Too many parameters.")
-    #     exit(1)
-    seq(bf_dir)

@@ -1,2 +1,3 @@
-python BrainHunt_seq.py -th 5 -id 0 -dbdir D:\GitHub\BrainHant-PRO\BF -raw2 -incdec 200 -minout -telegram
+rem python BrainHunt_seq.py -th 1 -id 0 -dbdir D:\GitHub\BFCreate_NonameHUNT2 -raw2 -incdec 100 -minout
+python BrainHunt_seq.py -th 1 -id 0 -dbdir D:\GitHub\BFCreate_NonameHUNT2 -raw2 -minout
 pause

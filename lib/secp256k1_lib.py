@@ -630,10 +630,13 @@ def privatekey_group_to_ETH_address_bytes(pvk_int, m):
     return bytes(bytearray(res))
 #==============================================================================
 def bloom_check_add_mcpu(bigbuff, num_items, sz, check_add, bloom_bits, bloom_hashes, bloom_filter):
+    print('bloom_check_add_mcpu')
     found_array = (b'\x00') * num_items
-#    sz = 32; check_add = 0 for check and 1 for add
+    #sz = 32 #; check_add = 0 for check and 1 for add
     ice.bloom_check_add_mcpu(bigbuff, num_items, found_array, sz, check_add, bloom_bits, bloom_hashes, bloom_filter)
-    return found_array
+    print('bloom_check_add_mcpu END')
+
+    return found_array, bloom_bits, bloom_hashes, bloom_filter
 #==============================================================================
 def to_cpub(pub_hex):
     P = pub_hex

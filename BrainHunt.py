@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.20/27.01.23'
+version = 'BrainHunt Classic 3.22/05.02.23'
 from lib.function import *
 
 def init_worker():
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     print('-'*70,end='\n')
     print(f'[I] Version: {color.cyan}{version}')
-    print(f'[I] Version LIB: {color.cyan}{version_lib}')
+    print(f'[I] Version LIB: {color.cyan}{version_LIB}')
     print(f'[I] Start proogramm: {color.cyan}{date_str()}')
     print(f'[I] Total kernel of CPU: {color.cyan}{cpu_count()}')
     print(f'[I] Used kernel: {color.cyan}{th}')
@@ -91,15 +91,15 @@ if __name__ == "__main__":
     else: print(f'[I] Send telegram: {color.red}Disabled')
 
     print('-'*70,end='\n')
-    mask = "btc*.dat"
+    mask = "btc*.bin"
     list_btc = load_bf(bf_dir, mask)
     if len(list_btc) != 0:
         cbtc = True
-    mask = "alt*.dat"
+    mask = "alt*.bin"
     list_alt = load_bf(bf_dir, mask)
     if len(list_alt) != 0:
         calt = True
-    mask = "eth*.dat"
+    mask = "eth*.bin"
     list_eth = load_bf(bf_dir, mask)
     if len(list_eth) != 0:
         ceth = True
@@ -156,10 +156,12 @@ if __name__ == "__main__":
                 results = pool.map(bw, l)
                 for map_res in results:
                     for res in map_res:
+                        if type(res[3]) != bytes:
+                            print('NOT BYTES')
                         if res[0] == 'btc':
                             if cbtc:
-                                for check in list_btc:
-                                    if bloom_check(check, res[3], len(res[3])):
+                                for BF in list_btc:
+                                    if BF.check(res[3]):
                                         print(f'\n{color.green}FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                         save_file('found',f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
@@ -167,7 +169,7 @@ if __name__ == "__main__":
                                     co += 1
                             if calt:
                                 for check in list_alt:
-                                    if bloom_check(check, res[3], len(res[3])):
+                                    if BF.check(res[3]):
                                         print(f'\n{color.green}FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                         save_file('found',f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
@@ -176,7 +178,7 @@ if __name__ == "__main__":
                         if res[0] == 'eth':
                             if ceth:
                                 for check in list_eth:
-                                    if bloom_check(check, res[3], len(res[3])):
+                                    if BF.check(res[3]):
                                         print(f'\n{color.green}FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                         save_file('found',f'FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
@@ -211,17 +213,19 @@ if __name__ == "__main__":
             results = pool.map(bw, l)
             for ii in range(len(results)):
                 for iii in range(len(results[ii])):
+                    if type(res[3]) != bytes:
+                        print('NOT BYTES')
                     if res[0] == 'btc':
                         if cbtc:
                             for check in list_btc:
-                                if bloom_check(check, res[3], len(res[3])):
+                                if BF.check(res[3]):
                                     print(f'\n{color.green}FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
                                         send_telegram(f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                         if calt:
                             for check in list_alt:
-                                if bloom_check(check, res[3], len(res[3])):
+                                if BF.check(res[3]):
                                     print(f'\n{color.green}FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
@@ -229,7 +233,7 @@ if __name__ == "__main__":
                     if res[0] == 'eth':
                         if ceth:
                             for check in list_alt:
-                                if bloom_check(check, res[3], len(res[3])):
+                                if BF.check(res[3]):
                                     print(f'\n{color.green}FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
