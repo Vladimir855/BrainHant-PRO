@@ -204,8 +204,8 @@ if __name__ == "__main__":
             l = []
     else:
         results = pool.map(bw, l)
-        for ii in range(len(results)):
-            for iii in range(len(results[ii])):
+        for map_res in results:
+            for res in map_res:
                 if res[0] == 'btc':
                     if cbtc:
                         for BF in list_btc:

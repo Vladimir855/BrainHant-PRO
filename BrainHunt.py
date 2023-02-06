@@ -120,14 +120,15 @@ if __name__ == "__main__":
     co = 0
     l = []
     file = ''
-    if raw:
-        if incdec > 1:
-            list_line = int(10000/10)
-        else: list_line = 10000
-    else:
-        if incdec > 1:
-            list_line = int(5000/10)
-        else: list_line = 5000
+    # if raw:
+    #     if incdec > 1:
+    #         list_line = int(10000/10)
+    #     else: list_line = 10000
+    # else:
+    #     if incdec > 1:
+    #         list_line = int(5000/10)
+    #     else: list_line = 5000
+    list_line = 20 * th
     total_count = 0
     total_st = time()
     station = continue_point
@@ -211,13 +212,13 @@ if __name__ == "__main__":
                 l = []
         else:
             results = pool.map(bw, l)
-            for ii in range(len(results)):
-                for iii in range(len(results[ii])):
+            for map_res in results:
+                for res in map_res:
                     if type(res[3]) != bytes:
                         print('NOT BYTES')
                     if res[0] == 'btc':
                         if cbtc:
-                            for check in list_btc:
+                            for BF in list_btc:
                                 if BF.check(res[3]):
                                     print(f'\n{color.green}FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
@@ -232,7 +233,7 @@ if __name__ == "__main__":
                                         send_telegram(f'FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                     if res[0] == 'eth':
                         if ceth:
-                            for check in list_alt:
+                            for check in list_eth:
                                 if BF.check(res[3]):
                                     print(f'\n{color.green}FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
                                     save_file('found',f'FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
