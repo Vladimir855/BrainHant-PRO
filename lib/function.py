@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version_lib = 'LIB 3.6/05.02.23'
+version_lib = 'LIB 3.9/12.02.23'
 
 from multiprocessing import Pool, freeze_support, cpu_count
 from time import time, sleep
@@ -21,12 +21,12 @@ from datetime import datetime
 import glob, pathlib
 from io import TextIOWrapper
 from json import loads, dump
-from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address_bytes
+from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address_bytes, check_collision, Load_data_to_memory
 from .libhunt import LibHUNT, version_LIB
 from bitcoin import mul_privkeys, inv, N, random_key
 import string, secrets, random
+from .patina import HashMap
 from colorama import Back, Fore, Style, init
-import logging
 init(autoreset = True)
 
 alphabet = string.ascii_letters + string.digits
@@ -41,6 +41,23 @@ class color:
     back = '\033[1A'
     clear_screen = '\x1b[2J'
 
+def rescan(hash160, pref, _path):
+    tmp = False
+    _path = _path.replace('\\', '/')
+    if _path[-1] != '\\' or path[-1] != '/':
+        _path += '/'
+    pp = _path+pref+'.rescan'
+    print(f'[I] {color.cyan} Enable rescan {pref} {hash160.hex()}')
+    if path.exists(pp):
+        hm = HashMap.load2(_path+pref+'.rescan')
+        tmp = hm.contains_key(hash160.hex())
+        del hm
+        return tmp
+    else: 
+        print(f'[W] {color.red}File {_path}{pref}.rescan is missing')
+        print(f'[W] {color.red} Mode Recheck Disable')
+        return None
+        
 def load_bf(path, mask):
     bf_list = []
     path = path.replace('\\', '/')

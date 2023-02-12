@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt EX 3.16/05.02.23'
+version = 'BrainHunt EX 3.18/12.02.23'
 from lib.function import *
 
 def init_worker():
@@ -15,15 +15,16 @@ def init_worker():
 def createParser():
     parser = ArgumentParser(description='BrainHunt-EX')
     parser.add_argument ('-th', '--threading', action='store', type=int, help='threading', default='1')
-    parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='File BF', default='')
-    parser.add_argument ('-telegram', '--telegram', action='store_true', help='enable update')
-    parser.add_argument ('-id', '--id', action='store', type=int, help='threading', default='0')
+    parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='DIR BF', default='')
+    parser.add_argument ('-rescandir', '--database_rescan', action='store', type=str, help='DIR rescan', default='')
+    parser.add_argument ('-telegram', '--telegram', action='store_true', help='enable telegram')
+    parser.add_argument ('-id', '--id', action='store', type=int, help='id for save', default='0')
     parser.add_argument ('-desc', '--desc', action='store', type=str, help='description', default='local')
     parser.add_argument ('-save', '--save', action='store', type=int, help='save continue sec', default='60')
     parser.add_argument ('-minout', '--minout', action='store_true', help='minimal out console')
     parser.add_argument ('-raw', '--raw', action='store_true', help='input raw')
     parser.add_argument ('-incdec', '--incdec', action='store', type=int, help='IncDec', default='1')
-    return parser.parse_args().threading, parser.parse_args().database_dir, \
+    return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().database_rescan,\
         parser.parse_args().telegram, parser.parse_args().id, parser.parse_args().desc, parser.parse_args().save, parser.parse_args().minout, parser.parse_args().raw, parser.parse_args().incdec
 
 if __name__ == "__main__":
@@ -36,6 +37,8 @@ if __name__ == "__main__":
     th:int = 1
     in_file = ''
     bf_dir:str = ''
+    crescan:bool = False
+    rescan_dir:str = ''
     list_btc:list = []
     list_eth:list = []
     list_alt:list = []
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     minout = False
     raw:bool = False
     incdec:int = 1
-    th, bf_dir, telegram_enable, id, desc, save, minout, raw, incdec  = createParser()
+    th, bf_dir, rescan_dir, telegram_enable, id, desc, save, minout, raw, incdec  = createParser()
 
     data_local = load_configure('setings.json')
     try:
@@ -70,6 +73,9 @@ if __name__ == "__main__":
     if telegram_enable:
         telegram_enable = send_telegram(f'[I] Version:{version} ID:{id} desc:{desc} Start programm: {date_str()}', telegram_channel_id, telegram_token)
 
+    if rescan_dir != '':
+        crescan = True
+
     print('-'*70,end='\n')
     print(f'[I] Version: {color.cyan}{version}')
     print(f'[I] Version LIB: {color.cyan}{version_lib}')
@@ -78,6 +84,8 @@ if __name__ == "__main__":
     print(f'[I] Used kernel: {color.cyan}{th}')
     print(f'[I] Used ID: {color.cyan}{id}')
     print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
+    if crescan:
+        print(f'[I] Directory Rescan: {color.cyan}{rescan_dir}')
     if incdec > 1:
         print(f'[I] IncDEc: {color.cyan}Enable')
         print(f'[I] IncDEc: {color.cyan}{incdec}')
@@ -87,6 +95,7 @@ if __name__ == "__main__":
     else: print(f'[I] Input Raw private key: {color.red}Disabled')
     if telegram_enable: print(f'[I] Send telegram: {color.green}Enable')
     else: print(f'[I] Send telegram: {color.red}Disabled')
+    
     print('-'*70,end='\n')
     mask = "btc*.bin"
     list_btc = load_bf(bf_dir, mask)
@@ -112,18 +121,20 @@ if __name__ == "__main__":
     if ceth: 
         print(f'[I] Bloom Work:{color.cyan}ETH')
     print('-'*70,end='\n')
+    
     line_co = 0
     co = 0
     l = []
     step_print = 0
-    if raw:
-        if incdec > 1:
-            list_line = int(10000/10)
-        else: list_line = 10000
-    else:
-        if incdec > 1:
-            list_line = int(5000/10)
-        else: list_line = 5000
+    # if raw:
+    #     if incdec > 1:
+    #         list_line = int(10000/10)
+    #     else: list_line = 10000
+    # else:
+    #     if incdec > 1:
+    #         list_line = int(5000/10)
+    #     else: list_line = 5000
+    list_line = 100 * th
     total_count = 0
     total_st = time()
     station = continue_point_ex
@@ -151,51 +162,89 @@ if __name__ == "__main__":
             results = pool.map(bw, l)
             for map_res in results:
                 for res in map_res:
-                    if res[0] == 'btc':
-                        if cbtc:
-                            for BF in list_btc:
-                                if BF.check(res[3]):
-                                    print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                    save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                    if type(res[3]) != bytes:
+                        print('NOT BYTES')
+                    if res[0] == 'btc' and cbtc:
+                        for BF in list_btc:
+                            if BF.check(res[3]):
+                                if crescan:
+                                    rez = rescan(res[3], 'btc', rescan_dir)
+                                    if rez == None: crescan = False
+                                    elif rez == True:
+                                        print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        if telegram_enable:
+                                            send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                    else:
+                                        print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                else:
+                                    print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
-                                        send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                                co += 1
-                        if calt:
-                            for check in list_alt:
-                                if BF.check(res[3]):
-                                    print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                    save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                                        send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                            co += 1
+                    if res[0] == 'alt' and calt:    
+                        for check in list_alt:
+                            if BF.check(res[3]):
+                                if crescan:
+                                    rez = rescan(res[3], 'alt', rescan_dir)
+                                    if rez == None: crescan = False
+                                    elif rez == True:
+                                        print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        if telegram_enable:
+                                            send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                    else:
+                                        print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                else:
+                                    print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
-                                        send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                                co += 1
-                    if res[0] == 'eth':
-                        if ceth:
-                            for check in list_eth:
-                                if BF.check(res[3]):
-                                    print(f'\nFOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                    save_file('found',f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                                        send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                            co += 1
+                                
+                    if res[0] == 'eth' and ceth:
+                        for check in list_eth:
+                            if BF.check(res[3]):
+                                if crescan:
+                                    rez = rescan(res[3], 'btc', rescan_dir)
+                                    if rez == None: crescan = False
+                                    elif rez == True:
+                                        print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        if telegram_enable:
+                                            send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                    else:
+                                        print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                else:
+                                    print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if telegram_enable:
-                                        send_telegram(f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                                co += 1
+                                        send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                            co += 1
             try:
                 speed_float, speed_hash = convert_int(co/(time()-st))
             except:
                 speed_float, speed_hash = 0.0 , 'Key'
             step_print +=1
-            if raw:
-                try:
-                    ww = hex(res[1])
-                except:
+            if step_print > 20:
+                if raw:
+                    try:
+                        ww = hex(res[1])
+                    except:
+                        ww = str(res[1])
+                else:
                     ww = str(res[1])
-            else:
-                ww = str(res[1])
-            if minout:
-                print(' '*110,end='\r')
-                print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
-            else:
-                print(' '*110,end='\r')
-                print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
-            step_print = 0
+                if minout:
+                    print(' '*110,end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
+                else:
+                    print(' '*110,end='\r')
+                    print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
+                step_print = 0
             if (int(time()-total_st)) >= save:
                 save_station_ex(id,total_count)
                 save += save
@@ -206,29 +255,65 @@ if __name__ == "__main__":
         results = pool.map(bw, l)
         for map_res in results:
             for res in map_res:
-                if res[0] == 'btc':
-                    if cbtc:
-                        for BF in list_btc:
-                            if BF.check(res[3]):
-                                print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                if type(res[3]) != bytes:
+                    print('NOT BYTES')
+                if res[0] == 'btc' and cbtc:
+                    for BF in list_btc:
+                        if BF.check(res[3]):
+                            if crescan:
+                                rez = rescan(res[3], 'btc', rescan_dir)
+                                if rez == None: crescan = False
+                                elif rez == True:
+                                    print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                    if telegram_enable:
+                                        send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                else:
+                                    print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                            else:
+                                print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                    if calt:
-                        for check in list_alt:
-                            if BF.check(res[3]):
-                                print(f'\nFOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                                    send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                if res[0] == 'alt' and calt:    
+                    for check in list_alt:
+                        if BF.check(res[3]):
+                            if crescan:
+                                rez = rescan(res[3], 'alt', rescan_dir)
+                                if rez == None: crescan = False
+                                elif rez == True:
+                                    print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                    if telegram_enable:
+                                        send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                else:
+                                    print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                            else:
+                                print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
-                if res[0] == 'eth':
-                    if ceth:
-                        for check in list_eth:
-                            if BF.check(res[3]):
-                                print(f'\nFOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}\n')
-                                save_file('found',f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}')
+                                    send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                if res[0] == 'eth' and ceth:
+                    for check in list_eth:
+                        if BF.check(res[3]):
+                            if crescan:
+                                rez = rescan(res[3], 'eth', rescan_dir)
+                                if rez == None: crescan = False
+                                elif rez == True:
+                                    print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                    if telegram_enable:
+                                        send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                else:
+                                    print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                            else:
+                                print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                 if telegram_enable:
-                                    send_telegram(f'FOUND ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc}', telegram_channel_id, telegram_token)
+                                    send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
     pool.terminate()
     pool.join()
     print ("\nEnd File.")
