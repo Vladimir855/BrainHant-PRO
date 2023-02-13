@@ -178,7 +178,7 @@ class LibHUNT:
                 buffer (bytes): Item to add.
             Returns:
                 bool: True if the item added, False if the item is already in the filter"""
-        if type(buffer) == str: fixed = buffer.zfill(40)
+        if type(buffer) == str: buffer = buffer.zfill(40)
         binary_data = buffer if isinstance(buffer, bytes) else bytes.fromhex(buffer)
         result = LibHUNT.__bloom_add(self.__bloom, binary_data, len(binary_data))
         if result == -1:
