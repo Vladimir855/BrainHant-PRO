@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt EX 3.18/12.02.23'
+version = 'BrainHunt EX 3.2/14.02.23'
 from lib.function import *
 
 def init_worker():
@@ -84,8 +84,8 @@ if __name__ == "__main__":
     print(f'[I] Used kernel: {color.cyan}{th}')
     print(f'[I] Used ID: {color.cyan}{id}')
     print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
-    if crescan:
-        print(f'[I] Directory Rescan: {color.cyan}{rescan_dir}')
+    if crescan: print(f'[I] Directory Rescan: {color.cyan}{rescan_dir}')
+    else: print(f'[I] Rescan: {color.red}Disabled')
     if incdec > 1:
         print(f'[I] IncDEc: {color.cyan}Enable')
         print(f'[I] IncDEc: {color.cyan}{incdec}')
@@ -228,7 +228,7 @@ if __name__ == "__main__":
             try:
                 speed_float, speed_hash = convert_int(co/(time()-st))
             except:
-                speed_float, speed_hash = 0.0 , 'Key'
+                speed_float, speed_hash = convert_int(co/1)
             step_print +=1
             if step_print > 20:
                 if raw:

@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt SEQ 3.16/12.02.23'
+version = 'BrainHunt SEQ 3.17/14.02.23'
 from lib.function import *
 
 def init_worker():
@@ -94,6 +94,9 @@ if __name__ == "__main__":
     if telegram_enable:
         telegram_enable = send_telegram(f'[I] Version: {version} ID:{id} desc:{desc} Start programm: {date_str()}', telegram_channel_id, telegram_token)
 
+    if rescan_dir != '':
+        crescan = True
+
     print('-'*70,end='\n')
     print(f'[I] Version: {color.cyan}{version}')
     print(f'[I] Version LIB: {color.cyan}{version_lib}')
@@ -106,8 +109,8 @@ if __name__ == "__main__":
     print(f'[I] Save continuation time: {color.cyan}{save}/sec')
     print(f'[I] Input DATA: {color.cyan}{word}')
     print(f'[I] Directory Bloom Filter: {color.cyan}{bf_dir}')
-    if crescan:
-        print(f'[I] Directory Rescan: {color.cyan}{rescan_dir}')
+    if crescan: print(f'[I] Directory Rescan: {color.cyan}{rescan_dir}')
+    else: print(f'[I] Rescan: {color.red}Disabled')
     if incdec > 1:
         print(f'[I] IncDEc: {color.cyan}Enable')
         print(f'[I] IncDEc: {color.cyan}{incdec}')
@@ -154,14 +157,15 @@ if __name__ == "__main__":
     co = 0
     total_count = 0
     total_st = time()
-    if raw1 or raw2:
-        if incdec > 1:
-            list_line = int(10000/10)
-        else: list_line = 10000
-    else:
-        if incdec > 1:
-            list_line = int(5000/10)
-        else: list_line = 5000
+    # if raw1 or raw2:
+    #     if incdec > 1:
+    #         list_line = int(10000/10)
+    #     else: list_line = 10000
+    # else:
+    #     if incdec > 1:
+    #         list_line = int(5000/10)
+    #     else: list_line = 5000
+    list_line = 100 * th
     step_print = 0
     l = []
     
@@ -252,7 +256,7 @@ if __name__ == "__main__":
         try:
             speed_float, speed_hash = convert_int(co/(time()-st))
         except:
-            speed_float, speed_hash = 0.0 , 'Key'
+            speed_float, speed_hash = convert_int(co/1)
         ww = str(res[1])
         print(' '*110,end='\r')
         if minout:

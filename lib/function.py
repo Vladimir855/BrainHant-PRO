@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version_lib = 'LIB 3.9/12.02.23'
+version_lib = 'LIB 3.10/14.02.23'
 
 from multiprocessing import Pool, freeze_support, cpu_count
 from time import time, sleep
@@ -21,7 +21,7 @@ from datetime import datetime
 import glob, pathlib
 from io import TextIOWrapper
 from json import loads, dump
-from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address_bytes, check_collision, Load_data_to_memory
+from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address, get_sha256
 from .libhunt import LibHUNT, version_LIB
 from bitcoin import mul_privkeys, inv, N, random_key
 import string, secrets, random
@@ -116,6 +116,7 @@ def save_file(infile, text):
         mkdir('log')
         file = f'log/{infile}.log'
         f = open(file, 'a', encoding='utf-8', errors='ignore')
+        f.write(f'[*] {text} \n')
         f.close()
         
 def load_configure(file):
@@ -129,7 +130,7 @@ def load_configure(file):
             else:
                 return data
     else: 
-        print(f'[W] {color.red}The settings file is missing. Download from server.')
+        print(f'[W] {color.red}The settings file is missing.')
         exit(1)
 
 def date_str():
@@ -143,96 +144,75 @@ def bw(input_list):
     ca = input_list[3]
     ce = input_list[4]
     incdec = input_list[5]
+    pvk_i = int(text,16)
+    pub_raw = scalar_multiplication(pvk_i)
+    current_pvk1 = pvk_i + 1
+    current_pvk2 = pvk_i - 1
+    if incdec > 1:
+        res_pub_inc = point_sequential_increment(incdec, pub_raw)
+        res_pub_dec = point_sequential_decrement(incdec, pub_raw)
     if raw:
-        pvk_i = int(text,16)
-        pub_raw = scalar_multiplication(pvk_i)
-        current_pvk1 = pvk_i + 1
-        current_pvk2 = pvk_i - 1
         f1 = []
         if cb or ca:
             f1.append(['btc', text, pvk_i, pubkey_to_h160(0, False, pub_raw), f'BTC/ALT RAW'])
             f1.append(['btc', text, pvk_i, pubkey_to_h160(0, True, pub_raw), f'BTC/ALT RAW'])
             f1.append(['btc', text, pvk_i, pubkey_to_h160(1, True, pub_raw), f'BTC/ALT RAW'])
             if incdec > 1:
-                res_pub = point_sequential_increment(incdec, pub_raw)
+                for inc2 in range(incdec):
+                    pub2 = res_pub_inc[inc2*65:inc2*65+65]
+                    f1.append(['btc', text, current_pvk1+inc2, pubkey_to_h160(0, False, pub2), f'BTC/ALT RAW INC {inc2}'])
+                    f1.append(['btc', text, current_pvk1+inc2, pubkey_to_h160(0, True, pub2), f'BTC/ALT RAW INC {inc2}'])
+                    f1.append(['btc', text, current_pvk1+inc2, pubkey_to_h160(1, True, pub2), f'BTC/ALT RAW INC {inc2}'])
                 for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(0, False, pub2), f'BTC/ALT RAW INC {dec2}'])
-                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(0, True, pub2), f'BTC/ALT RAW INC {dec2}'])
-                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(1, True, pub2), f'BTC/ALT RAW INC {dec2}'])
-                res_pub = point_sequential_decrement(incdec, pub_raw)
-                for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
+                    pub2 = res_pub_dec[dec2*65:dec2*65+65]
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(0, False, pub2), f'BTC/ALT RAW DEC {dec2}'])
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(0, True, pub2), f'BTC/ALT RAW DEC {dec2}'])
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(1, True, pub2), f'BTC/ALT RAW DEC {dec2}'])
         if ce:
-            #f1.append(['eth', text, pvk_i, LibHUNT.get_keccak(pub_raw)[12:],'ETH RAW'])
-            #f1.append(['eth', text, pvk_i, LibHUNT.get_keccak_KH(pub_raw),'ETH RAW'])
-            f1.append(['eth', text, pvk_i, pubkey_to_ETH_address_bytes(pub_raw),'ETH RAW'])
+            f1.append(['eth', text, pvk_i, bytes.fromhex(pubkey_to_ETH_address(pub_raw)),'ETH RAW'])
             if incdec > 1:
                 res_pub = point_sequential_increment(incdec, pub_raw)
-                for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
-                    #f1.append(['eth', text, current_pvk1+dec2, LibHUNT.get_keccak(pub2)[12:], f'ETH RAW INC {dec2}'])
-                    f1.append(['eth', text, current_pvk1+dec2, pubkey_to_ETH_address_bytes(pub2),f'ETH RAW INC {dec2}'])
-                    #f1.append(['eth', text, current_pvk1+dec2, LibHUNT.get_keccak_KH(pub2),f'ETH RAW INC {dec2}'])
+                for inc2 in range(incdec):
+                    pub2 = res_pub_inc[inc2*65:inc2*65+65]
+                    f1.append(['eth', text, current_pvk1+inc2, bytes.fromhex(pubkey_to_ETH_address(pub2)),f'ETH RAW INC {inc2}'])
                 res_pub = point_sequential_decrement(incdec, pub_raw)
                 for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
-                    #f1.append(['eth', text, current_pvk2-dec2, LibHUNT.get_keccak(pub2)[12:], f'ETH RAW DEC {dec2}'])
-                    f1.append(['eth', text, current_pvk2-dec2, pubkey_to_ETH_address_bytes(pub2),f'ETH RAW DEC {dec2}'])
-                    #f1.append(['eth', text, current_pvk1+dec2, LibHUNT.get_keccak_KH(pub2),f'ETH RAW INC {dec2}'])
+                    pub2 = res_pub_dec[dec2*65:dec2*65+65]
+                    f1.append(['eth', text, current_pvk2-dec2, bytes.fromhex(pubkey_to_ETH_address(pub2)),f'ETH RAW DEC {dec2}'])
         return f1
     else:
         f1 = []
+        binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
+        hash_sha256 = get_sha256(binary_data).hex()
+        pvk_i = int(hash_sha256, 16)
+        pub_raw = scalar_multiplication(pvk_i)
+        current_pvk1 = pvk_i + 1
+        current_pvk2 = pvk_i - 1
         if cb or ca:
-            binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-            hash_sha256 = LibHUNT.get_sha256(binary_data).hex()
-            #hash_sha256 = get_sha256(binary_data).hex()
-            pvk_i = int(hash_sha256, 16)
-            pub_raw = scalar_multiplication(pvk_i)
-            current_pvk1 = pvk_i + 1
-            current_pvk2 = pvk_i - 1
             f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, pub_raw), 'BTC/ALT'])
             f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, True, pub_raw), 'BTC/ALT'])
             f1.append(['btc', text, hash_sha256, pubkey_to_h160(1, True, pub_raw), 'BTC/ALT'])
             if incdec > 1:
-                res_pub = point_sequential_increment(incdec, pub_raw)
-                for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
-                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(0, False, pub2),f'BTC/ALT INC {dec2}'])
-                    f1.append(['btc', text ,current_pvk1+dec2, pubkey_to_h160(0, True, pub2),f'BTC/ALT INC {dec2}'])
-                    f1.append(['btc', text, current_pvk1+dec2, pubkey_to_h160(1, True, pub2),f'BTC/ALT INC {dec2}'])
+                for inc2 in range(incdec):
+                    pub2 = res_pub_inc[inc2*65:inc2*65+65]
+                    f1.append(['btc', text, current_pvk1+inc2, pubkey_to_h160(0, False, pub2),f'BTC/ALT INC {inc2}'])
+                    f1.append(['btc', text ,current_pvk1+inc2, pubkey_to_h160(0, True, pub2),f'BTC/ALT INC {inc2}'])
+                    f1.append(['btc', text, current_pvk1+inc2, pubkey_to_h160(1, True, pub2),f'BTC/ALT INC {inc2}'])
                 res_pub = point_sequential_decrement(incdec, pub_raw)
                 for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
+                    pub2 = res_pub_dec[dec2*65:dec2*65+65]
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(0, False, pub2),f'BTC/ALT DEC {dec2}'])
                     f1.append(['btc', text ,current_pvk2-dec2, pubkey_to_h160(0, True, pub2),f'BTC/ALT DEC {dec2}'])
                     f1.append(['btc', text, current_pvk2-dec2, pubkey_to_h160(1, True, pub2),f'BTC/ALT DEC {dec2}'])
         if ce:
-            binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-            hash_keccak_256 = LibHUNT.get_keccak(binary_data)[12:].hex()
-            # k = keccak.new(digest_bits=256)
-            # k.update(binary_data)
-            # hash_keccak_256 = k.hexdigest()
-            pvk_i = int(hash_keccak_256, 16)
-            pub_raw = scalar_multiplication(pvk_i)
-            current_pvk1 = pvk_i + 1
-            current_pvk2 = pvk_i - 1
-            #f1.append(['eth',text,hash_keccak_256,LibHUNT.get_keccak(pub_raw)[12:],'ETH'])
-            f1.append(['eth',text,hash_keccak_256,pubkey_to_ETH_address_bytes(pub_raw),'ETH'])
+            f1.append(['eth', text, hash_sha256, bytes.fromhex(pubkey_to_ETH_address(pub_raw)), 'ETH'])
             if incdec > 1:
-                res_pub = point_sequential_increment(incdec, pub_raw)
+                for inc2 in range(incdec):
+                    pub2 = res_pub[inc2*65:inc2*65+65]
+                    f1.append(['eth', text, current_pvk1+inc2, bytes.fromhex(pubkey_to_ETH_address(pub2)),f'ETH INC {inc2}'])
                 for dec2 in range(incdec):
                     pub2 = res_pub[dec2*65:dec2*65+65]
-                    #f1.append(['eth', text, current_pvk1+dec2, LibHUNT.get_keccak(pub2)[12:],f'ETH INC {dec2}'])
-                    f1.append(['eth', text, current_pvk1+dec2, pubkey_to_ETH_address_bytes(pub2),f'ETH INC {dec2}'])
-                res_pub = point_sequential_decrement(incdec, pub_raw)
-                for dec2 in range(incdec):
-                    pub2 = res_pub[dec2*65:dec2*65+65]
-                    #f1.append(['eth', text, current_pvk2-dec2, LibHUNT.get_keccak(pub2)[12:],f'ETH DEC {dec2}'])
-                    f1.append(['eth', text, current_pvk2-dec2, pubkey_to_ETH_address_bytes(pub2),f'ETH DEC {dec2}'])
+                    f1.append(['eth', text, current_pvk2-dec2, bytes.fromhex(pubkey_to_ETH_address(pub2)),f'ETH DEC {dec2}'])
         return f1
 
 def bw_seq(input_list):
@@ -250,37 +230,33 @@ def bw_seq(input_list):
     pub_raw = scalar_multiplication(pvk)
     current_pvk1 = pvk + 1
     current_pvk2 = pvk - 1
+    if incdec > 1:
+        res_pub_inc = point_sequential_increment(incdec, pub_raw)
+        res_pub_dec = point_sequential_decrement(incdec, pub_raw)
     if cb or ca:
         f1.append(['btc',w,pvk,pubkey_to_h160(0, False, pub_raw), 'BTC/ALT'])
         f1.append(['btc',w,pvk,pubkey_to_h160(0, True, pub_raw), 'BTC/ALT'])
         f1.append(['btc',w,pvk,pubkey_to_h160(1, True, pub_raw), 'BTC/ALT'])
         if incdec > 1:
-            res_pub = point_sequential_increment(incdec, pub_raw)
+            for inc2 in range(incdec):
+                pub2 = res_pub_inc[inc2*65:inc2*65+65]
+                f1.append(['btc', w, current_pvk1+inc2, pubkey_to_h160(0, False, pub2), f'BTC/ALT INC {inc2}'])
+                f1.append(['btc', w, current_pvk1+inc2, pubkey_to_h160(0, True, pub2), f'BTC/ALT INC {inc2}'])
+                f1.append(['btc', w, current_pvk1+inc2, pubkey_to_h160(1, True, pub2), f'BTC/ALT INC {inc2}'])
             for dec2 in range(incdec):
-                pub2 = res_pub[dec2*65:dec2*65+65]
-                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(0, False, pub2), f'BTC/ALT INC {dec2}'])
-                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(0, True, pub2), f'BTC/ALT INC {dec2}'])
-                f1.append(['btc', w, current_pvk1+dec2, pubkey_to_h160(1, True, pub2), f'BTC/ALT INC {dec2}'])
-            res_pub = point_sequential_decrement(incdec, pub_raw)
-            for dec2 in range(incdec):
-                pub2 = res_pub[dec2*65:dec2*65+65]
+                pub2 = res_pub_dec[dec2*65:dec2*65+65]
                 f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(0, False, pub2), f'BTC/ALT DEC {dec2}'])
                 f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(0, True, pub2), f'BTC/ALT DEC {dec2}'])
                 f1.append(['btc', w, current_pvk2-dec2, pubkey_to_h160(1, True, pub2), f'BTC/ALT DEC {dec2}'])
     if ce:
-        #f1.append(['eth', w, pvk, LibHUNT.get_keccak(pub_raw)[12:], 'ETH'])
-        f1.append(['eth', w, pvk, pubkey_to_ETH_address_bytes(pub_raw)[2:], 'ETH'])
+        f1.append(['eth', w, pvk, bytes.fromhex(pubkey_to_ETH_address(pub_raw)), 'ETH'])
         if incdec > 1:
-            res_pub = point_sequential_increment(incdec, pub_raw)
+            for inc2 in range(incdec):
+                pub2 = res_pub_inc[inc2*65:inc2*65+65]
+                f1.append(['eth', w, current_pvk1+inc2, bytes.fromhex(pubkey_to_ETH_address(pub2)), f'ETH INC {inc2}'])
             for dec2 in range(incdec):
-                pub2 = res_pub[dec2*65:dec2*65+65]
-                #f1.append(['eth', w, current_pvk1+dec2, LibHUNT.get_keccak(pub2)[12:],f'ETH INC {dec2}'])
-                f1.append(['eth', w, current_pvk1+dec2, pubkey_to_ETH_address_bytes(pub2), f'ETH INC {dec2}'])
-            res_pub = point_sequential_decrement(incdec, pub_raw)
-            for dec2 in range(incdec):
-                pub2 = res_pub[dec2*65:dec2*65+65]
-                #f1.append(['eth', w, current_pvk2-dec2, LibHUNT.get_keccak(pub2)[12:],f'ETH DEC {dec2}'])
-                f1.append(['eth', w, current_pvk2-dec2, pubkey_to_ETH_address_bytes(pub2), f'ETH DEC {dec2}'])
+                pub2 = res_pub_dec[dec2*65:dec2*65+65]
+                f1.append(['eth', w, current_pvk2-dec2, bytes.fromhex(pubkey_to_ETH_address(pub2)), f'ETH DEC {dec2}'])
     return f1
 
 def gen_hash(input_list):
@@ -319,29 +295,19 @@ def gen_hash(input_list):
             except:
                 text = hex(random.randrange(2**240, 2**256))[2:]
             byt = bytes.fromhex(text.zfill(64))
-            sha = LibHUNT.get_sha256(byt).hex()
+            sha = get_sha256(byt).hex()
             gen.append([sha, sha, cb, ca, ce, incdec])
             text = sha
         return gen
     else:
         for _ in range(list_line):
             text = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-            sha = LibHUNT.get_sha256(text)
+            sha = get_sha256(text)
             try:
                 gen.append([text.hex(), sha.hex(), cb, ca, ce, incdec])
             except:
                 gen.append([text, sha.hex(), cb, ca, ce, incdec])
             text = sha.hex()
-            
-        for _ in range(list_line):
-            text = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-            kecc = LibHUNT.get_keccak(text)
-            #kecc = pubkey_to_ETH_address_bytes(text)
-            try:
-                gen.append([text.hex(), kecc.hex(), cb, ca, ce, incdec])
-            except:
-                gen.append([text, kecc.hex(), cb, ca, ce, incdec])
-            text = kecc.hex()
         return gen
 
 def save_station(id, conti):
