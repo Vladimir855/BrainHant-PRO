@@ -144,10 +144,18 @@ def bw(input_list):
     ca = input_list[3]
     ce = input_list[4]
     incdec = input_list[5]
-    pvk_i = int(text,16)
-    pub_raw = scalar_multiplication(pvk_i)
-    current_pvk1 = pvk_i + 1
-    current_pvk2 = pvk_i - 1
+    if raw:
+        pvk_i = int(text,16)
+        pub_raw = scalar_multiplication(pvk_i)
+        current_pvk1 = pvk_i + 1
+        current_pvk2 = pvk_i - 1
+    else:
+        binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
+        hash_sha256 = get_sha256(binary_data).hex()
+        pvk_i = int(hash_sha256, 16)
+        pub_raw = scalar_multiplication(pvk_i)
+        current_pvk1 = pvk_i + 1
+        current_pvk2 = pvk_i - 1
     if incdec > 1:
         res_pub_inc = point_sequential_increment(incdec, pub_raw)
         res_pub_dec = point_sequential_decrement(incdec, pub_raw)
@@ -182,12 +190,7 @@ def bw(input_list):
         return f1
     else:
         f1 = []
-        binary_data = text if isinstance(text, bytes) else bytes(text, 'utf-8')
-        hash_sha256 = get_sha256(binary_data).hex()
-        pvk_i = int(hash_sha256, 16)
-        pub_raw = scalar_multiplication(pvk_i)
-        current_pvk1 = pvk_i + 1
-        current_pvk2 = pvk_i - 1
+
         if cb or ca:
             f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, False, pub_raw), 'BTC/ALT'])
             f1.append(['btc', text, hash_sha256, pubkey_to_h160(0, True, pub_raw), 'BTC/ALT'])

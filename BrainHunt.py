@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.27/14.02.23'
+version = 'BrainHunt Classic 3.28/16.02.23'
 from lib.function import *
 
 def init_worker():
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                                             send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
                                 co += 1
                         if res[0] == 'alt' and calt:    
-                            for check in list_alt:
+                            for BF in list_alt:
                                 if BF.check(res[3]):
                                     if crescan:
                                         rez = rescan(res[3], 'alt', rescan_dir)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
                                 co += 1
                                     
                         if res[0] == 'eth' and ceth:
-                            for check in list_eth:
+                            for BF in list_eth:
                                 if BF.check(res[3]):
                                     if crescan:
                                         rez = rescan(res[3], 'eth', rescan_dir)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
                                             send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
 
                         if res[0] == 'alt' and calt:    
-                            for check in list_alt:
+                            for BF in list_alt:
                                 if BF.check(res[3]):
                                     if crescan:
                                         rez = rescan(res[3], 'alt', rescan_dir)
@@ -301,7 +301,7 @@ if __name__ == "__main__":
                                             send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
                                    
                         if res[0] == 'eth' and ceth:
-                            for check in list_eth:
+                            for BF in list_eth:
                                 if BF.check(res[3]):
                                     if crescan:
                                         rez = rescan(res[3], 'eth', rescan_dir)
