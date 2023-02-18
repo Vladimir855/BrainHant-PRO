@@ -1,8 +1,16 @@
+# #!/usr/bin/python3
+# encoding=utf-8
+# -*- coding: utf-8 -*-
+"""
+@author: NonameHUNT
+@GitHub: https://github.com/Noname400
+@telegram: https://t.me/NonameHunt
+"""
 import ctypes
 import os
 import platform
 
-version_LIB = "2.9 / 05.02.23"
+version_LIB = "2.11 / 18.02.23"
 
 class LibHUNT:
     if platform.system().lower().startswith('win'):
@@ -67,14 +75,6 @@ class LibHUNT:
     __lib.bloom_version.argtypes = []
     __lib.bloom_version.restype = ctypes.c_char_p
     __bloom_version = __lib.bloom_version
-    #keccak-sha3
-    # __lib.sha3_256.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_size_t, ctypes.POINTER(ctypes.c_ubyte)]
-    # __lib.sha3_256.restype = None
-    # __lib_sha3 = __lib.sha3_256
-    # #keccak-keyhunt
-    # __lib.KECCAK_256.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint8)]
-    # __lib.KECCAK_256.restype = None
-    # __lib_keccak_KH = __lib.KECCAK_256
     #keccak
     __lib.keccak_256.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_size_t, ctypes.POINTER(ctypes.c_ubyte)]
     __lib.keccak_256.restype = None
@@ -93,26 +93,12 @@ class LibHUNT:
         hash = LibHUNT.__lib_old_elec_seed(data)
         return hash
 
-    # @staticmethod
-    # def get_keccak_KH(data: bytes):
-    #     digest = ctypes.create_string_buffer(32)
-    #     data_array = (ctypes.c_ubyte * len(data))(*data)
-    #     LibHUNT.__lib_keccak_KH(data_array, len(data_array), ctypes.cast(digest, ctypes.POINTER(ctypes.c_ubyte)))
-    #     return digest.raw
-
     @staticmethod
     def get_keccak(data: bytes):
         digest = ctypes.create_string_buffer(32)
         data_array = (ctypes.c_ubyte * len(data))(*data)
         LibHUNT.__lib_keccak(data_array, len(data_array), ctypes.cast(digest, ctypes.POINTER(ctypes.c_ubyte)))
         return digest.raw
-    
-    # @staticmethod
-    # def get_sha3(data: bytes) -> bytes:
-    #     digest = ctypes.create_string_buffer(32)
-    #     data_array = (ctypes.c_ubyte * len(data))(*data)
-    #     LibHUNT.__lib_sha3(data_array, len(data_array), ctypes.cast(digest, ctypes.POINTER(ctypes.c_ubyte)))
-    #     return digest.raw
 
     @staticmethod
     def get_sha256(data: bytes) -> bytes:
@@ -158,12 +144,11 @@ class LibHUNT:
 
     def check(self, buffer: str) -> bool:
         """Checks if the given item is present in the filter.
-
             Parameters:
                 buffer (bytes): Item to check.
             Returns:
                 bool: Is item in the filter."""
-        if type(buffer) == str: fixed = buffer.zfill(40)
+        if type(buffer) == str: buffer = buffer.zfill(40)
         binary_data = buffer if isinstance(buffer, bytes) else bytes.fromhex(buffer)
         result = LibHUNT.__bloom_check(self.__bloom, binary_data, len(binary_data))
         if result == -1:
@@ -179,12 +164,15 @@ class LibHUNT:
             Returns:
                 bool: True if the item added, False if the item is already in the filter"""
         if type(buffer) == str: buffer = buffer.zfill(40)
-        binary_data = buffer if isinstance(buffer, bytes) else bytes.fromhex(buffer)
+        try:
+            binary_data = buffer if isinstance(buffer, bytes) else bytes.fromhex(buffer)
+        except:
+            return -1
         result = LibHUNT.__bloom_add(self.__bloom, binary_data, len(binary_data))
         if result == -1:
-            raise RuntimeError("[E] libhunt add bloom: bloom not ready")
+            return -2
         else:
-            return result == 0
+            return 0
 
     def save(self, filename: str) -> None:
         """Saves the filter to the file.

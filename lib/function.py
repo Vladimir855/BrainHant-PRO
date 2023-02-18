@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version_lib = 'LIB 3.10/14.02.23'
+version_lib = 'LIB 3.11/16.02.23'
 
 from multiprocessing import Pool, freeze_support, cpu_count
 from time import time, sleep
@@ -21,8 +21,8 @@ from datetime import datetime
 import glob, pathlib
 from io import TextIOWrapper
 from json import loads, dump
-from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address, get_sha256
-from .libhunt import LibHUNT, version_LIB
+from .secp256k1_lib import pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement, pubkey_to_ETH_address, get_sha256, point_multiplication, point_negation
+from .hunt_lib import LibHUNT, version_LIB
 from bitcoin import mul_privkeys, inv, N, random_key
 import string, secrets, random
 from .patina import HashMap
@@ -30,6 +30,18 @@ from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
 alphabet = string.ascii_letters + string.digits
+
+def normalize(src):
+    if type(src) == bytes: return src.hex()
+    elif type(src) == int: return hex(src)
+    elif type(src) == str:
+        try:
+            src = src.hex()
+        except:
+            src = str(src)
+        finally:
+            return src
+            
 
 class color:
     yellow = Fore.YELLOW+Style.BRIGHT
@@ -49,8 +61,8 @@ def rescan(hash160, pref, _path):
     pp = _path+pref+'.rescan'
     print(f'[I] {color.cyan} Enable rescan {pref} {hash160.hex()}')
     if path.exists(pp):
-        hm = HashMap.load2(_path+pref+'.rescan')
-        tmp = hm.contains_key(hash160.hex())
+        hm = HashMap.load(_path+pref+'.rescan')
+        tmp = hm.contains_key(hash160)
         del hm
         return tmp
     else: 

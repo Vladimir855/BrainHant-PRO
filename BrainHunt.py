@@ -6,7 +6,7 @@
 @GitHub: https://github.com/Noname400
 @telegram: https://t.me/NonameHunt
 """
-version = 'BrainHunt Classic 3.28/16.02.23'
+version = 'BrainHunt Classic 3.29/18.02.23'
 from lib.function import *
 
 def init_worker():
@@ -165,88 +165,92 @@ if __name__ == "__main__":
                 results = pool.map(bw, l)
                 for map_res in results:
                     for res in map_res:
-                        if type(res[3]) != bytes:
-                            print('NOT BYTES')
                         if res[0] == 'btc' and cbtc:
                             for BF in list_btc:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'btc', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                                            send_telegram(f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
                                 co += 1
                         if res[0] == 'alt' and calt:    
                             for BF in list_alt:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'alt', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                                            send_telegram(f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                 co += 1
                                     
                         if res[0] == 'eth' and ceth:
                             for BF in list_eth:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'eth', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                            send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                 co += 1
                 try:
                     speed_float, speed_hash = convert_int(co/(time()-st))
                 except:
                     speed_float, speed_hash = convert_int(co/1)
                 step_print +=1
-                if step_print > 20:
-                    if raw:
-                        try:
-                            ww = hex(res[1])
-                        except:
-                            ww = str(res[1])
-                    else:
-                        ww = str(res[1])
+                if step_print > 10:
+                    WORD = normalize(res[1])
                     if minout:
                         print(' '*110,end='\r')
-                        print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{ww[:10]}... desc:{desc}',end='\r')
+                        print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{WORD[:10]}... desc:{desc}',end='\r')
                     else:
                         print(' '*110,end='\r')
-                        print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{res[1]} desc:{desc}',end='\r')
+                        print(f'{color.yellow}Total time: {time()-total_st:.2f}, Total Hash: {total_count}, Speed:{speed_float} {speed_hash} ID:{id} word:{WORD} desc:{desc}',end='\r')
                     step_print = 0
                 if (int(time()-total_st)) >= save:
                     save_station(id,total_count)
@@ -263,62 +267,74 @@ if __name__ == "__main__":
                         if res[0] == 'btc' and cbtc:
                             for BF in list_btc:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'btc', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                                            send_telegram(f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
 
                         if res[0] == 'alt' and calt:    
                             for BF in list_alt:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'alt', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F False] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
+                                            send_telegram(f'[F] FOUND {date_str()} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token) 
                                    
                         if res[0] == 'eth' and ceth:
                             for BF in list_eth:
                                 if BF.check(res[3]):
+                                    WORD = normalize(res[1])
+                                    PVK = normalize(res[2])
+                                    print(f'\n{color.green}[F bloom] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                    save_file('found-bloom',f'[F bloom] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     if crescan:
                                         rez = rescan(res[3], 'eth', rescan_dir)
                                         if rez == None: crescan = False
                                         elif rez == True:
-                                            print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found',f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                             if telegram_enable:
-                                                send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                                send_telegram(f'[F True] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
                                         else:
-                                            print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                            save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                            print(f'\n{color.green}[F false] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                            save_file('found-false',f'[F false] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                     else:
-                                        print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
-                                        save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
+                                        print(f'\n{color.green}[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}\n')
+                                        save_file('found',f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}')
                                         if telegram_enable:
-                                            send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{res[1]} PVK:{(res[2])} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
+                                            send_telegram(f'[F] FOUND {date_str()} ETH:0x{res[3]} word:{WORD} PVK:{PVK} Algo:{res[4]} ID:{id} desc:{desc} {in_file}', telegram_channel_id, telegram_token)
     pool.terminate()
     pool.join()
     print ("\nEnd File.")
