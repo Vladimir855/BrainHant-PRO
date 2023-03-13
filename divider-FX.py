@@ -21,14 +21,13 @@ import glob, pathlib
 from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
-version = 'Divider 2.2 / 13.03.23'
+version = 'Divider 2.3 / 13.03.23'
 
 def init_worker():
     signal(SIGINT, SIG_IGN)
 
 def createParser():
-    parser = ArgumentParser(description='BrainHunt')
-    parser.add_argument ('-th', '--threading',       action='store', type=int, help='threading', default='1')
+    parser = ArgumentParser(description='Divider-FX')
     parser.add_argument ('-dbdir', '--database_dir', action='store', type=str, help='File BF', default='')
     parser.add_argument ('-start', '--start',        action='store', type=str, help='start range', default='')
     parser.add_argument ('-end',   '--end',          action='store', type=str, help='end range', default='')
@@ -38,14 +37,14 @@ def createParser():
     parser.add_argument ('-inccycle', '--inccycle',  action='store', type=int, help='count cycle', default='100')
     parser.add_argument ('-divcicle', '--divcicle',  action='store', type=int, help='input raw', default='100000')
 
-    return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().start, parser.parse_args().end, parser.parse_args().group, parser.parse_args().startdiv, \
+    return parser.parse_args().database_dir, parser.parse_args().start, parser.parse_args().end, parser.parse_args().group, parser.parse_args().startdiv, \
         parser.parse_args().incdiv, parser.parse_args().inccycle, parser.parse_args().divcicle
         
 
 if __name__ == "__main__":
     freeze_support()
     cls()
-    th, bf_dir, start, end, groud_size, start_div, inc_div, inc_cycle, div_cicle  = createParser()
+    bf_dir, start, end, groud_size, start_div, inc_div, inc_cycle, div_cicle  = createParser()
 
     list_btc:list = []
     list_eth:list = []
