@@ -10,7 +10,7 @@ import bitcoin
 import random, math
 from decimal import Decimal
 from lib.secp256k1_lib import pubkey_to_ETH_address, hash_to_address, pubkey_to_h160, scalar_multiplication, point_sequential_increment, point_sequential_decrement
-from lib.libhunt import LibHUNT, version_LIB
+from lib.hunt_lib import LibHUNT, version_LIB
 from lib.function import *
 from time import time
 from random import randint
@@ -21,7 +21,7 @@ import glob, pathlib
 from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
-version = '2.0 / 05.02.23'
+version = 'Divider 2.2 / 13.03.23'
 
 def init_worker():
     signal(SIGINT, SIG_IGN)
@@ -33,9 +33,9 @@ def createParser():
     parser.add_argument ('-start', '--start',        action='store', type=str, help='start range', default='')
     parser.add_argument ('-end',   '--end',          action='store', type=str, help='end range', default='')
     parser.add_argument ('-group', '--group',        action='store', type=int, help='group size', default='50000')
-    parser.add_argument ('-startdiv', '--startdiv',  action='store', type=int, help='description', default='1000')
-    parser.add_argument ('-incdiv', '--incdiv',      action='store', type=int, help='save continue sec', default='100')
-    parser.add_argument ('-inccycle', '--inccycle',  action='store', type=int, help='minimal out console', default='100')
+    parser.add_argument ('-startdiv', '--startdiv',  action='store', type=int, help='start divide', default='1000')
+    parser.add_argument ('-incdiv', '--incdiv',      action='store', type=int, help='step divider', default='100')
+    parser.add_argument ('-inccycle', '--inccycle',  action='store', type=int, help='count cycle', default='100')
     parser.add_argument ('-divcicle', '--divcicle',  action='store', type=int, help='input raw', default='100000')
 
     return parser.parse_args().threading, parser.parse_args().database_dir, parser.parse_args().start, parser.parse_args().end, parser.parse_args().group, parser.parse_args().startdiv, \
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     fff = start_div # Начальный делитель Аналог 1.00
     fff1 = inc_div # Прирощение делителя Аналог 0.01
     group_size = groud_size # Сколько проверять в + и в -
-    begin_key = randint(start, end)
+    begin_key = randint(int(start,16), int(end,16))
     cycle1 = inc_cycle # Количество циклов на прирощение делителя
     cycle2 = div_cicle # Количество циклов деления (чем меньше делитель тем больше циклов надо)
     l = []
@@ -115,7 +115,7 @@ if __name__ == "__main__":
                 Pv = point_sequential_increment(group_size, P)
                 for t in range(group_size):
                     pub = Pv[t*65:t*65+65]
-                    if cbtc or calt:
+                    if cbtc:
                         hash160 = pubkey_to_h160(0,True,pub)
                         hash160_u = pubkey_to_h160(0,False,pub)
                         hash160_3 = pubkey_to_h160(1,True,pub)
@@ -128,10 +128,23 @@ if __name__ == "__main__":
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
                             counter += 1
+                    if calt:
+                        hash160 = pubkey_to_h160(0,True,pub)
+                        hash160_u = pubkey_to_h160(0,False,pub)
+                        hash160_3 = pubkey_to_h160(1,True,pub)
+                        for BF in list_alt:
+                            if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
+                                if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
+                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    l.append(hash160.hex())
+                                    l.append(hash160_u.hex())
+                                    l.append(hash160_3.hex())
+                            counter += 1
                     if ceth:
                         eth = pubkey_to_ETH_address(pub)[2:]
                         for check in list_eth:
-                            if BF.check(check, eth, len(eth)):
+                            if BF.check(eth):
                                 if eth not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth} ')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth}\n')
@@ -143,12 +156,25 @@ if __name__ == "__main__":
                 Pv = point_sequential_decrement(group_size, P)
                 for t in range(group_size):
                     pub = Pv[t*65:t*65+65]
-                    if cbtc or calt:
+                    if cbtc:
                         hash160 = pubkey_to_h160(0,True,pub)
                         hash160_u = pubkey_to_h160(0,False,pub)
                         hash160_3 = pubkey_to_h160(1,True,pub)
                         for BF in list_btc:
-                            if BF.check(check, hash160, len(hash160)) or BF.check(check, hash160_u, len(hash160_u)) or BF.check(check, hash160_3, len(hash160_3)):
+                            if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
+                                if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
+                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    l.append(hash160.hex())
+                                    l.append(hash160_u.hex())
+                                    l.append(hash160_3.hex())
+                        counter += 1
+                    if calt:
+                        hash160 = pubkey_to_h160(0,True,pub)
+                        hash160_u = pubkey_to_h160(0,False,pub)
+                        hash160_3 = pubkey_to_h160(1,True,pub)
+                        for BF in list_alt:
+                            if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
@@ -159,7 +185,7 @@ if __name__ == "__main__":
                     if ceth:
                         eth = pubkey_to_ETH_address(pub)[2:]
                         for BF in list_eth:
-                            if BF.check(check, eth, len(eth)):
+                            if BF.check(eth):
                                 if eth not in l:
                                     print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth} ')
                                     save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth}\n')
