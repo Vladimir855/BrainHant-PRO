@@ -21,7 +21,7 @@ import glob, pathlib
 from colorama import Back, Fore, Style, init
 init(autoreset = True)
 
-version = 'Divider 2.3 / 13.03.23'
+version = 'Divider 2.4 / 14.03.23'
 
 def init_worker():
     signal(SIGINT, SIG_IGN)
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     counter = 0
     total = 0
     plus = 0
+
     print('-'*70,end='\n')
     mask = "btc*.bin"
     list_btc = load_bf(bf_dir, mask)
@@ -78,7 +79,8 @@ if __name__ == "__main__":
     if len(list_btc) + len(list_eth) + len(list_alt) == 0:
         print(f'{color.red}bloom filters not found in folder {bf_dir}')
         exit(0)
-    print(f'[I] {color.green}Bloomfilter loaded...')
+    print(f'[I] {color.green}Bloomfilter {len(list_btc) + len(list_eth) + len(list_alt)} loaded...')
+    
     print('-'*70,end='\n')
     if cbtc: 
         print(f'[I] Bloom Work:{color.cyan}BTC')
@@ -87,8 +89,7 @@ if __name__ == "__main__":
     if ceth: 
         print(f'[I] Bloom Work:{color.cyan}ETH')
     print('-'*70,end='\n')
-    list_btc.extend(list_alt)
-    list_alt = []
+
     while True:
         for _ in range(cycle1):
             counter = 0
@@ -121,8 +122,8 @@ if __name__ == "__main__":
                         for BF in list_btc:
                             if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    print(f'[F BTC increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F BTC increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
                                     l.append(hash160.hex())
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
@@ -134,19 +135,19 @@ if __name__ == "__main__":
                         for BF in list_alt:
                             if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    print(f'[F ALT increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F ALT increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
                                     l.append(hash160.hex())
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
                             counter += 1
                     if ceth:
-                        eth = pubkey_to_ETH_address(pub)[2:]
-                        for check in list_eth:
+                        eth = pubkey_to_ETH_address(pub)
+                        for BF in list_eth:
                             if BF.check(eth):
                                 if eth not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth} ')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth}\n')
+                                    print(f'[F ETH increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth} ')
+                                    save_file('found',f'[F ETH increment] global:{n} F:{fff} {hex(current_pvk1 + t)} {eth}\n')
                                     l.append(eth)
                             counter += 1
 
@@ -162,8 +163,8 @@ if __name__ == "__main__":
                         for BF in list_btc:
                             if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    print(f'[F BTC increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F BTC increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
                                     l.append(hash160.hex())
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
@@ -175,22 +176,22 @@ if __name__ == "__main__":
                         for BF in list_alt:
                             if BF.check(hash160) or BF.check(hash160_u) or BF.check(hash160_3):
                                 if hash160.hex() not in l or hash160_3.hex() not in l or hash160_u.hex() not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
+                                    print(f'[F ALT increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}')
+                                    save_file('found',f'[F ALT increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {hash160.hex()} {hash160_u.hex()} {hash160_3.hex()}\n')
                                     l.append(hash160.hex())
                                     l.append(hash160_u.hex())
                                     l.append(hash160_3.hex())
                         counter += 1
                     if ceth:
-                        eth = pubkey_to_ETH_address(pub)[2:]
+                        eth = pubkey_to_ETH_address(pub)
                         for BF in list_eth:
                             if BF.check(eth):
                                 if eth not in l:
-                                    print(f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth} ')
-                                    save_file('found',f'[F increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth}\n')
+                                    print(f'[F ETH increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth} ')
+                                    save_file('found',f'[F ETH increment] global:{n} F:{fff} {hex(current_pvk2 - t)} {eth}\n')
                                     l.append(eth)
                         counter += 1
                 total += 1
-                print(f'[+] Total Keys Checked : {total}  F:{fff:.2f} PVK:{hex(n)[:12]}... [ Speed : {counter/(time() - st):.2f} Keys/s ] ', end='\r')
+                print(f'[+] Total Keys Checked : {total}  F:{fff:.2f} PVK:{hex(n)} [ Speed : {counter/(time() - st):.2f} Keys/s ] ', end='\r')
                 counter = 0
         plus += 1

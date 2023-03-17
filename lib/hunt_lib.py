@@ -87,7 +87,7 @@ class LibHUNT:
     __lib.elec_old_seed.argtypes = [ctypes.c_char_p]
     __lib.elec_old_seed.restype = ctypes.c_char_p
     __lib_old_elec_seed = __lib.elec_old_seed
-
+    
     @staticmethod
     def old_elec(data: bytes) -> bytes:
         hash = LibHUNT.__lib_old_elec_seed(data)
